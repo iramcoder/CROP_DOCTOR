@@ -3,91 +3,91 @@
 // ============================================================================
 import 'package:flutter/material.dart';
 
-class DiseasesScreen extends StatelessWidget {
-  const DiseasesScreen({super.key});
+class TreatmentsScreen extends StatelessWidget {
+  const TreatmentsScreen({super.key});
 
   // ==========================================================================
-  // SECTION 2: DISEASE DETAILS DATABASE
-  // Focuses on identifying and understanding the diseases.
+  // SECTION 2: TREATMENT DATABASE
+  // Grouped by Crop. Contains Organic, Chemical, and Preventative measures.
   // ==========================================================================
-  Map<String, List<Map<String, dynamic>>> _getDiseaseDetailsDatabase() {
+  Map<String, List<Map<String, dynamic>>> _getTreatmentDatabase() {
     return {
       "Pepper": [
         {
           "disease": "Bacterial Spot",
-          "symptoms": ["Water-soaked spots on leaves that turn brown/black", "Leaves may turn yellow and drop prematurely", "Raised, scabby spots on the pepper fruit"],
-          "causes": ["Caused by Xanthomonas bacteria", "Thrives in warm, highly humid, and wet weather"],
-          "impact": ["Severe defoliation reduces fruit yield", "Sun-scald on exposed fruit"]
+          "organic": ["Prune and destroy infected leaves", "Spray with copper-based organic fungicides"],
+          "chemical": ["Apply Copper hydroxide sprays", "Apply Streptomycin if permitted"],
+          "prevention": ["Rotate crops annually", "Avoid overhead watering"]
         }
       ],
       "Potato": [
         {
           "disease": "Early Blight",
-          "symptoms": ["Dark, concentric rings (bullseye pattern) on older leaves", "Yellowing around the leaf spots", "Dark, sunken lesions on potato tubers"],
-          "causes": ["Caused by the Alternaria solani fungus", "Spreads rapidly during alternating wet and dry weather"],
-          "impact": ["Premature leaf death limits tuber size and yield"]
+          "organic": ["Remove lower infected leaves", "Apply compost tea or baking soda spray"],
+          "chemical": ["Apply Chlorothalonil or Mancozeb fungicides", "Use Azoxystrobin sprays"],
+          "prevention": ["Ensure good plant spacing for airflow", "Mulch around the base"]
         },
         {
           "disease": "Late Blight",
-          "symptoms": ["Large, dark, water-soaked lesions on leaves", "White, fuzzy mold on the undersides of leaves in high humidity", "Tubers develop dry, corky rot"],
-          "causes": ["Caused by Phytophthora infestans (a water mold)", "Extremely contagious in cool, wet weather"],
-          "impact": ["Can destroy an entire field within days if left unchecked"]
+          "organic": ["Destroy all infected plants immediately", "Apply Copper sprays as a preventative"],
+          "chemical": ["Apply systemic fungicides like Mefenoxam or Chlorothalonil immediately"],
+          "prevention": ["Plant resistant potato varieties", "Destroy cull piles"]
         }
       ],
       "Tomato": [
         {
           "disease": "Bacterial Spot",
-          "symptoms": ["Small, dark, greasy spots on leaves", "Spots on fruit that look like tiny, raised scabs"],
-          "causes": ["Xanthomonas bacteria spread by splashing rain or tools"],
-          "impact": ["Causes early leaf drop and unmarketable fruit"]
+          "organic": ["Remove heavily infected foliage", "Use a fixed-copper organic spray"],
+          "chemical": ["Apply Copper-based bactericides combined with Mancozeb"],
+          "prevention": ["Water at the base of the plant only", "Disinfect gardening tools"]
         },
         {
           "disease": "Early Blight",
-          "symptoms": ["Bullseye-patterned spots starting on the lowest leaves", "Heavy yellowing around the spots"],
-          "causes": ["Alternaria solani fungus dwelling in the soil"],
-          "impact": ["Defoliation exposes fruit to sunscald and reduces yield"]
+          "organic": ["Trim lower leaves touching the soil", "Apply Neem oil or Bacillus subtilis"],
+          "chemical": ["Spray with Chlorothalonil or Copper fungicides every 7 days"],
+          "prevention": ["Use mulch to prevent soil splashing", "Stake or cage tomatoes"]
         },
         {
           "disease": "Late Blight",
-          "symptoms": ["Irregular greenish-black water-soaked patches", "Rapid wilting of the entire plant"],
-          "causes": ["Phytophthora infestans spreading via wind-blown spores"],
-          "impact": ["Total crop failure; highly destructive"]
+          "organic": ["Pull up and destroy infected plants immediately", "Apply preventative Copper spray"],
+          "chemical": ["Apply Mancozeb, Chlorothalonil, or Copper fungicides"],
+          "prevention": ["Keep foliage dry", "Ensure excellent air circulation"]
         },
         {
           "disease": "Leaf Mold",
-          "symptoms": ["Pale green or yellow spots on the upper leaf surface", "Olive-green to brown velvety mold on the bottom"],
-          "causes": ["Passalora fulva fungus", "Thrives in greenhouses with poor ventilation and high humidity"],
-          "impact": ["Reduces photosynthetic area, weakening the plant"]
+          "organic": ["Prune branches to improve airflow", "Reduce humidity in greenhouses"],
+          "chemical": ["Apply Chlorothalonil or Calcium polysulfide"],
+          "prevention": ["Water early in the day", "Space plants widely"]
         },
         {
           "disease": "Septoria Leaf Spot",
-          "symptoms": ["Numerous small, circular spots with dark borders and grey/tan centers", "Tiny black specks in the center of the spots"],
-          "causes": ["Septoria lycopersici fungus from infected plant debris"],
-          "impact": ["Vigorous defoliation starting from the bottom up"]
+          "organic": ["Remove infected leaves immediately", "Apply bio-fungicides like Serenade"],
+          "chemical": ["Spray with Mancozeb or Chlorothalonil-based fungicides"],
+          "prevention": ["Remove weeds and debris", "Do not work with plants when wet"]
         },
         {
           "disease": "Spotted Spider Mites",
-          "symptoms": ["Tiny yellow or white speckles (stippling) on leaves", "Fine, silky webbing visible on stems and leaves"],
-          "causes": ["Tetranychus urticae (a tiny pest, not a fungus)", "Thrive in hot, very dry conditions"],
-          "impact": ["Leaves dry up and fall off; severe stress to the plant"]
+          "organic": ["Introduce predatory ladybugs", "Spray with insecticidal soap or Neem oil"],
+          "chemical": ["Apply specific miticides if infestation is severe"],
+          "prevention": ["Keep plants well-watered", "Remove infested debris"]
         },
         {
           "disease": "Target Spot",
-          "symptoms": ["Small brown spots with yellow halos", "Spots develop into target-like concentric circles"],
-          "causes": ["Corynespora cassiicola fungus"],
-          "impact": ["Causes lesions on both leaves and fruit, causing rot"]
+          "organic": ["Remove infected plant parts", "Improve air circulation around canopy"],
+          "chemical": ["Apply Azoxystrobin or Chlorothalonil"],
+          "prevention": ["Avoid overhead irrigation", "Use proper plant spacing"]
         },
         {
           "disease": "Mosaic Virus",
-          "symptoms": ["Mottled light and dark green patterns on leaves", "Leaves become fern-like or stringy", "Stunted overall plant growth"],
-          "causes": ["ToMV virus", "Spread easily by contaminated hands, tools, or tobacco products"],
-          "impact": ["Incurable. Permanently stunts growth and fruit production"]
+          "organic": ["No cure exists. Pull and destroy infected plants immediately."],
+          "chemical": ["No chemical treatments exist for viruses."],
+          "prevention": ["Wash hands with soap before handling", "Disinfect tools with bleach"]
         },
         {
           "disease": "Yellow Leaf Curl Virus",
-          "symptoms": ["Severe upward curling and crinkling of leaves", "Yellowing of leaf margins", "Flowers drop before setting fruit"],
-          "causes": ["TYLCV virus, transmitted almost exclusively by Silverleaf Whiteflies"],
-          "impact": ["Devastating to yields; plants stop producing completely"]
+          "organic": ["Remove infected plants", "Control whiteflies with yellow sticky traps"],
+          "chemical": ["Use insecticides like Imidacloprid to control whiteflies"],
+          "prevention": ["Use reflective mulches", "Plant resistant tomato varieties"]
         }
       ]
     };
@@ -98,12 +98,12 @@ class DiseasesScreen extends StatelessWidget {
   // ==========================================================================
   @override
   Widget build(BuildContext context) {
-    final db = _getDiseaseDetailsDatabase();
+    final db = _getTreatmentDatabase();
 
     return Scaffold(
       backgroundColor: const Color(0xFFF4F6F5),
       appBar: AppBar(
-        title: const Text('Disease Encyclopedia', style: TextStyle(color: Colors.black)),
+        title: const Text('Treatment Guide', style: TextStyle(color: Colors.black)),
         backgroundColor: Colors.white,
         elevation: 0,
         iconTheme: const IconThemeData(color: Colors.black),
@@ -112,22 +112,22 @@ class DiseasesScreen extends StatelessWidget {
         padding: const EdgeInsets.all(20.0),
         children: [
           const Text(
-            "Identify Diseases",
+            "Cures & Treatments",
             style: TextStyle(fontSize: 26, fontWeight: FontWeight.bold, color: Color(0xFF1C2333)),
           ),
           const SizedBox(height: 8),
           const Text(
-            "Identify and understand the symptoms, causes, and impacts of various crop diseases.",
+            "Browse comprehensive organic, chemical, and preventative treatment plans for all supported crops.",
             style: TextStyle(fontSize: 16, color: Colors.grey, height: 1.4),
           ),
           const SizedBox(height: 30),
 
           // --- CROP SECTIONS ---
-          _buildCropSection("Pepper Diseases", Icons.eco, const Color(0xFF27AE60), db["Pepper"]!),
+          _buildCropSection("Pepper Treatments", Icons.eco, const Color(0xFF27AE60), db["Pepper"]!),
           const SizedBox(height: 25),
-          _buildCropSection("Potato Diseases", Icons.grass, const Color(0xFFD35400), db["Potato"]!),
+          _buildCropSection("Potato Treatments", Icons.grass, const Color(0xFFD35400), db["Potato"]!),
           const SizedBox(height: 25),
-          _buildCropSection("Tomato Diseases", Icons.local_florist, const Color(0xFFE74C3C), db["Tomato"]!),
+          _buildCropSection("Tomato Treatments", Icons.local_florist, const Color(0xFFE74C3C), db["Tomato"]!),
           const SizedBox(height: 40),
         ],
       ),
@@ -172,10 +172,9 @@ class DiseasesScreen extends StatelessWidget {
             expandedCrossAxisAlignment: CrossAxisAlignment.start,
             children: [
               const Divider(), const SizedBox(height: 10),
-              // Updated to show Symptoms, Causes, and Impact
-              _buildRow(Icons.warning_amber_rounded, "Symptoms:", data["symptoms"], const Color(0xFFE67E22)), const SizedBox(height: 15),
-              _buildRow(Icons.biotech, "Causes:", data["causes"], const Color(0xFF8E44AD)), const SizedBox(height: 15),
-              _buildRow(Icons.trending_down, "Impact:", data["impact"], const Color(0xFFE74C3C)),
+              _buildRow(Icons.eco, "Organic:", data["organic"], const Color(0xFF2ECC71)), const SizedBox(height: 15),
+              _buildRow(Icons.science, "Chemical:", data["chemical"], const Color(0xFFE67E22)), const SizedBox(height: 15),
+              _buildRow(Icons.shield, "Prevention:", data["prevention"], const Color(0xFF3498DB)),
             ],
           ),
         ),

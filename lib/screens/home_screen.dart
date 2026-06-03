@@ -1,6 +1,6 @@
 // ============================================================================
 // SECTION 1: IMPORTS
-// Bringing in UI tools, database tools, and our destination screens.
+// Bringing in UI tools, database libraries, and all linked destination screens.
 // ============================================================================
 import 'dart:typed_data';
 import 'package:flutter/material.dart';
@@ -8,23 +8,25 @@ import 'package:image_picker/image_picker.dart';
 import 'diagnose_screen.dart';
 import 'login_screen.dart'; 
 import 'history_screen.dart'; 
-import 'diseases_screen.dart'; // NEW: Imported to link the new Encyclopedia page!
+import 'diseases_screen.dart'; // Handles symptoms, causes, and impacts of crop diseases
+import 'treatments_screen.dart'; // Handles organic, chemical, and preventative treatments
+import 'community_screen.dart'; // NEW: Handles the offline device user leaderboard!
 
 // ============================================================================
 // SECTION 2: THE MAIN HOME SCREEN WIDGET
-// Uses a StatelessWidget because the UI values remain constant on this screen.
+// Uses a StatelessWidget because the UI structure is constant on this dashboard.
 // ============================================================================
 class HomeScreen extends StatelessWidget {
-  final String userName; // Catch the active user's name passed from Login Screen
-  final bool isNewUser;  // Catch the new/existing user flag to display the correct greeting
+  final String userName; // The active user's name passed from the Login Screen
+  final bool isNewUser;  // Flag indicating if this is a newly registered profile
 
   const HomeScreen({super.key, required this.userName, this.isNewUser = false});
 
   // ==========================================================================
-  // SECTION 3: HELPER METHODS FOR CAMERA & GALLERY
+  // SECTION 3: HELPER METHODS FOR CAMERA & GALLERY ACTIONS
   // ==========================================================================
   
-  // Shows a clean pop-up menu at the bottom asking the user to choose their input source
+  // Triggers the pop-up menu at the bottom asking the user to choose their input source
   void _showPickerOptions(BuildContext context) {
     showModalBottomSheet(
       context: context,
@@ -52,7 +54,7 @@ class HomeScreen extends StatelessWidget {
     );
   }
 
-  // Opens camera/gallery, compresses the image automatically to avoid memory crashes, and pushes to DiagnoseScreen
+  // Opens camera/gallery, compresses the image to avoid memory freeze, and pushes to DiagnoseScreen
   Future<void> _pickAndNavigate(BuildContext context, ImageSource source) async {
     try {
       final ImagePicker picker = ImagePicker();
@@ -88,12 +90,12 @@ class HomeScreen extends StatelessWidget {
               children: [
                 const SizedBox(height: 20),
 
-                // --- HEADER WITH DYNAMIC GREETING & SWITCH ACCOUNT BUTTON ---
+                // --- HEADER WITH DYNAMIC GREETING & PROFILE SWAP ACTION ---
                 Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
                     Text(
-                      // Uses the isNewUser flag to display custom greetings dynamically!
+                      // Uses the isNewUser flag to display customized greetings dynamically
                       isNewUser 
                           ? "Welcome,\n$userName!" 
                           : "Welcome back,\n$userName!", 
@@ -132,7 +134,7 @@ class HomeScreen extends StatelessWidget {
                     width: double.infinity, padding: const EdgeInsets.symmetric(vertical: 18, horizontal: 16),
                     decoration: BoxDecoration(color: const Color(0xFF159A6C).withOpacity(0.12), border: Border.all(color: const Color(0xFF159A6C), width: 1.5), borderRadius: BorderRadius.circular(16)),
                     child: const Row(
-                      mainAxisAlignment: MainAxisAlignment.center,
+                      mainAxisAlignment: Main => MainAxisAlignment.center,
                       children: [
                         Icon(Icons.document_scanner_outlined, color: Color(0xFF159A6C), size: 28), const SizedBox(width: 12),
                         Text("Scan a Plant", style: TextStyle(color: Color(0xFF159A6C), fontWeight: FontWeight.bold, fontSize: 18)),
@@ -142,7 +144,7 @@ class HomeScreen extends StatelessWidget {
                 ),
                 const SizedBox(height: 25),
 
-                // --- BANNER INTERCARD ---
+                // --- PROMOTIONAL BANNER ---
                 Container(
                   width: double.infinity, padding: const EdgeInsets.all(20),
                   decoration: BoxDecoration(gradient: const LinearGradient(colors: [Color(0xFF159A6C), Color(0xFF1DB87A)], begin: Alignment.topLeft, end: Alignment.bottomRight), borderRadius: BorderRadius.circular(20)),
@@ -178,9 +180,9 @@ class HomeScreen extends StatelessWidget {
                       onTap: () { Navigator.push(context, MaterialPageRoute(builder: (context) => HistoryScreen(userName: userName))); }
                     ),
                     
-                    // 2. Diseases (Navigates directly to the brand new Diseases Encyclopedia)
+                    // 2. Diseases (Navigates directly to the Diseases Encyclopedia)
                     FeatureCard(
-                      icon: Icons.healing_outlined, 
+                      icon: Icons.coronavirus_outlined, // Better icon for disease recognition
                       title: "Diseases", 
                       color: const Color(0xFFE74C3C), 
                       onTap: () {
@@ -191,11 +193,32 @@ class HomeScreen extends StatelessWidget {
                       }
                     ),
                     
-                    // 3. Weather
-                    FeatureCard(icon: Icons.wb_sunny_outlined, title: "Weather", color: const Color(0xFFFFA726), onTap: () {}),
+                    // 3. Treatments (Navigates to Treatment Guide)
+                    FeatureCard(
+                      icon: Icons.medication_outlined, // Medical/treatment icon
+                      title: "Treatments", 
+                      color: const Color(0xFF9B59B6), // Purple color theme
+                      onTap: () {
+                        Navigator.push(
+                          context, 
+                          MaterialPageRoute(builder: (context) => const TreatmentsScreen())
+                        );
+                      }
+                    ),
                     
-                    // 4. Community
-                    FeatureCard(icon: Icons.people_outline, title: "Community", color: const Color(0xFF42A5F5), onTap: () {}),
+                    // 4. Community (NEW: Navigates to the local Community Leaderboard)
+                    FeatureCard(
+                      icon: Icons.people_outline, 
+                      title: "Community", 
+                      color: const Color(0xFF42A5F5), // Keeping the nice blue theme
+                      onTap: () {
+                        // Navigate to the dynamic local community directory!
+                        Navigator.push(
+                          context, 
+                          MaterialPageRoute(builder: (context) => const CommunityScreen())
+                        );
+                      }
+                    ),
                   ],
                 ),
                 const SizedBox(height: 30),
