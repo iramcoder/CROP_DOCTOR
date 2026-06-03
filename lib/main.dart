@@ -1,36 +1,32 @@
 // ============================================================================
 // SECTION 1: IMPORTS
-// We import Flutter UI elements, our new Database plugin, and our Login Screen.
 // ============================================================================
-import 'package:flutter/material.dart'; // Core Material design UI library
-import 'package:hive_flutter/hive_flutter.dart'; // High-performance local NoSQL database plugin
-import 'screens/login_screen.dart'; // Pointer to our login profile manager screen
+import 'package:flutter/material.dart'; 
+import 'package:hive_flutter/hive_flutter.dart'; 
+import 'screens/login_screen.dart'; 
 
 // ============================================================================
 // SECTION 2: THE MAIN EXECUTION ENGINE
-// We mark main() as 'async' because database initialization happens in the background.
 // ============================================================================
 void main() async {
-  // 1. Safety Check: Tells Flutter to fully boot up its internal engine and bindings
-  // before we attempt to touch local files or communicate with native Android paths.
+  // Ensure Flutter is fully booted
   WidgetsFlutterBinding.ensureInitialized();
   
-  // 2. Initialize the Hive Database on the phone's physical storage.
-  // This automatically finds a secure directory inside the app's private sandbox.
+  // Initialize the local Hive Database
   await Hive.initFlutter();
   
-  // 3. Open a "Box" (which is essentially a table in our database).
-  // We name it 'user_database'. It will permanently hold our list of usernames.
+  // Open the table that holds our usernames
   await Hive.openBox('user_database');
 
-  // 4. Once the database is ready and our box is open, boot up the Flutter UI.
+  // NEW: Open the table that will securely store everyone's scan history
+  await Hive.openBox('scan_history');
+
+  // Boot up the UI
   runApp(const MyApp());
 }
 
 // ============================================================================
-// SECTION 3: THE ROOT OF THE APPLICATION
-// Standard stateless container setting up global themes and directing the app
-// to start immediately on our login screen.
+// SECTION 3: ROOT WIDGET
 // ============================================================================
 class MyApp extends StatelessWidget {
   const MyApp({super.key});
@@ -38,12 +34,12 @@ class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      debugShowCheckedModeBanner: false, // Hides the red "debug" banner in the corner
+      debugShowCheckedModeBanner: false, 
       title: 'Crop Doctor',
       theme: ThemeData(
-        primarySwatch: Colors.green, // Sets the global app accent color palette
+        primarySwatch: Colors.green, 
       ),
-      home: const LoginScreen(), // Points the launch screen directly to the Login Screen
+      home: const LoginScreen(), // Directs the app to start at the Login Screen
     );
   }
 }

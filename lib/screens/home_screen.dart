@@ -5,47 +5,33 @@ import 'dart:typed_data';
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
 import 'diagnose_screen.dart';
-import 'login_screen.dart'; // NEW: Imported so we can navigate back to login!
+import 'login_screen.dart'; 
+import 'history_screen.dart'; // NEW: Imported to navigate to history
 
 class HomeScreen extends StatelessWidget {
-  final String userName; // Accepts the name from the Welcome/Login screen
-
+  final String userName; 
   const HomeScreen({super.key, required this.userName});
 
-  // ==========================================================================
-  // SECTION 2: HELPER METHODS FOR CAMERA & GALLERY
-  // ==========================================================================
   void _showPickerOptions(BuildContext context) {
     showModalBottomSheet(
       context: context,
-      shape: const RoundedRectangleBorder(
-        borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
-      ),
+      shape: const RoundedRectangleBorder(borderRadius: BorderRadius.vertical(top: Radius.circular(20))),
       builder: (BuildContext bc) => Padding(
         padding: const EdgeInsets.all(20.0),
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
-            const Text(
-              "Select Image Source",
-              style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
-            ),
+            const Text("Select Image Source", style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
             const SizedBox(height: 20),
             ListTile(
               leading: const Icon(Icons.camera_alt, color: Color(0xFF159A6C)),
               title: const Text("Camera"),
-              onTap: () {
-                Navigator.pop(bc);
-                _pickAndNavigate(context, ImageSource.camera);
-              },
+              onTap: () { Navigator.pop(bc); _pickAndNavigate(context, ImageSource.camera); },
             ),
             ListTile(
               leading: const Icon(Icons.photo_library, color: Color(0xFF159A6C)),
               title: const Text("Gallery"),
-              onTap: () {
-                Navigator.pop(bc);
-                _pickAndNavigate(context, ImageSource.gallery);
-              },
+              onTap: () { Navigator.pop(bc); _pickAndNavigate(context, ImageSource.gallery); },
             ),
           ],
         ),
@@ -53,25 +39,19 @@ class HomeScreen extends StatelessWidget {
     );
   }
 
-  // Handles grabbing the image safely without freezing the app
   Future<void> _pickAndNavigate(BuildContext context, ImageSource source) async {
     try {
       final ImagePicker picker = ImagePicker();
-      final XFile? image = await picker.pickImage(
-        source: source,
-        maxWidth: 1080, // Compression to prevent freezing
-        imageQuality: 80,
-      );
+      final XFile? image = await picker.pickImage(source: source, maxWidth: 1080, imageQuality: 80);
 
       if (image != null) {
         final Uint8List imageBytes = await image.readAsBytes();
         if (!context.mounted) return;
 
+        // Pass the photo and the user's name to the AI engine
         Navigator.push(
           context,
-          MaterialPageRoute(
-            builder: (context) => DiagnoseScreen(imageBytes: imageBytes),
-          ),
+          MaterialPageRoute(builder: (context) => DiagnoseScreen(imageBytes: imageBytes, userName: userName)),
         );
       }
     } catch (e) {
@@ -95,120 +75,57 @@ class HomeScreen extends StatelessWidget {
               children: [
                 const SizedBox(height: 20),
 
-                // --- HEADER WITH GREETING AND SWITCH USER BUTTON ---
                 Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
-                    Text(
-                      "Good Morning,\n$userName!",
-                      style: const TextStyle(
-                        fontSize: 28,
-                        fontWeight: FontWeight.bold,
-                        color: Color(0xFF1C2333),
-                        height: 1.3,
-                      ),
-                    ),
-                    // NEW: Switch User / Logout Button
+                    Text("Good Morning,\n$userName!", style: const TextStyle(fontSize: 28, fontWeight: FontWeight.bold, color: Color(0xFF1C2333), height: 1.3)),
                     InkWell(
-                      onTap: () {
-                        // Navigates back to LoginScreen and clears history
-                        Navigator.pushAndRemoveUntil(
-                          context,
-                          MaterialPageRoute(builder: (context) => const LoginScreen()),
-                          (route) => false,
-                        );
-                      },
+                      onTap: () { Navigator.pushAndRemoveUntil(context, MaterialPageRoute(builder: (context) => const LoginScreen()), (route) => false); },
                       borderRadius: BorderRadius.circular(24),
-                      child: Container(
-                        padding: const EdgeInsets.all(12),
-                        decoration: BoxDecoration(
-                          color: const Color(0xFF159A6C).withOpacity(0.15),
-                          shape: BoxShape.circle,
-                        ),
-                        child: const Icon(
-                          Icons.swap_horiz, // A nice "Switch" icon
-                          color: Color(0xFF159A6C),
-                          size: 28,
-                        ),
-                      ),
+                      child: Container(padding: const EdgeInsets.all(12), decoration: BoxDecoration(color: const Color(0xFF159A6C).withOpacity(0.15), shape: BoxShape.circle), child: const Icon(Icons.swap_horiz, color: Color(0xFF159A6C), size: 28)),
                     ),
                   ],
                 ),
                 const SizedBox(height: 25),
 
-                // --- SEARCH BAR ---
                 TextField(
                   decoration: InputDecoration(
-                    hintText: "Search crops, diseases...",
-                    hintStyle: const TextStyle(color: Colors.grey),
-                    prefixIcon: const Icon(Icons.search, color: Colors.grey),
-                    filled: true,
-                    fillColor: Colors.white,
-                    contentPadding: const EdgeInsets.symmetric(vertical: 16, horizontal: 20),
-                    border: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(14),
-                      borderSide: BorderSide.none,
-                    ),
+                    hintText: "Search crops, diseases...", hintStyle: const TextStyle(color: Colors.grey), prefixIcon: const Icon(Icons.search, color: Colors.grey),
+                    filled: true, fillColor: Colors.white, contentPadding: const EdgeInsets.symmetric(vertical: 16, horizontal: 20),
+                    border: OutlineInputBorder(borderRadius: BorderRadius.circular(14), borderSide: BorderSide.none),
                   ),
                 ),
                 const SizedBox(height: 20),
 
-                // --- SCAN BUTTON ---
                 GestureDetector(
                   onTap: () => _showPickerOptions(context),
                   child: Container(
-                    width: double.infinity,
-                    padding: const EdgeInsets.symmetric(vertical: 18, horizontal: 16),
-                    decoration: BoxDecoration(
-                      color: const Color(0xFF159A6C).withOpacity(0.12),
-                      border: Border.all(color: const Color(0xFF159A6C), width: 1.5),
-                      borderRadius: BorderRadius.circular(16),
-                    ),
+                    width: double.infinity, padding: const EdgeInsets.symmetric(vertical: 18, horizontal: 16),
+                    decoration: BoxDecoration(color: const Color(0xFF159A6C).withOpacity(0.12), border: Border.all(color: const Color(0xFF159A6C), width: 1.5), borderRadius: BorderRadius.circular(16)),
                     child: const Row(
                       mainAxisAlignment: MainAxisAlignment.center,
                       children: [
-                        Icon(Icons.document_scanner_outlined, color: Color(0xFF159A6C), size: 28),
-                        SizedBox(width: 12),
-                        Text(
-                          "Scan a Plant",
-                          style: TextStyle(color: Color(0xFF159A6C), fontWeight: FontWeight.bold, fontSize: 18),
-                        ),
+                        Icon(Icons.document_scanner_outlined, color: Color(0xFF159A6C), size: 28), const SizedBox(width: 12),
+                        Text("Scan a Plant", style: TextStyle(color: Color(0xFF159A6C), fontWeight: FontWeight.bold, fontSize: 18)),
                       ],
                     ),
                   ),
                 ),
                 const SizedBox(height: 25),
 
-                // --- BANNER ---
                 Container(
-                  width: double.infinity,
-                  padding: const EdgeInsets.all(20),
-                  decoration: BoxDecoration(
-                    gradient: const LinearGradient(
-                      colors: [Color(0xFF159A6C), Color(0xFF1DB87A)],
-                      begin: Alignment.topLeft,
-                      end: Alignment.bottomRight,
-                    ),
-                    borderRadius: BorderRadius.circular(20),
-                  ),
+                  width: double.infinity, padding: const EdgeInsets.all(20),
+                  decoration: BoxDecoration(gradient: const LinearGradient(colors: [Color(0xFF159A6C), Color(0xFF1DB87A)], begin: Alignment.topLeft, end: Alignment.bottomRight), borderRadius: BorderRadius.circular(20)),
                   child: Row(
                     children: [
                       const Expanded(
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Text("Plant a seed of\nknowledge today!", style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold, color: Colors.white, height: 1.3)),
-                            SizedBox(height: 12),
-                            Text("Learn new farming techniques", style: TextStyle(fontSize: 14, color: Colors.white70)),
-                          ],
-                        ),
+                        child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+                          Text("Plant a seed of\nknowledge today!", style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold, color: Colors.white, height: 1.3)),
+                          SizedBox(height: 12), Text("Learn new farming techniques", style: TextStyle(fontSize: 14, color: Colors.white70)),
+                        ]),
                       ),
                       const SizedBox(width: 15),
-                      Container(
-                        width: 80, height: 80,
-                        decoration: BoxDecoration(color: Colors.white.withOpacity(0.2), borderRadius: BorderRadius.circular(16)),
-                        child: const Icon(Icons.eco, size: 45, color: Colors.white),
-                      ),
+                      Container(width: 80, height: 80, decoration: BoxDecoration(color: Colors.white.withOpacity(0.2), borderRadius: BorderRadius.circular(16)), child: const Icon(Icons.eco, size: 45, color: Colors.white)),
                     ],
                   ),
                 ),
@@ -216,35 +133,23 @@ class HomeScreen extends StatelessWidget {
 
                 // --- FEATURE GRID ---
                 GridView.count(
-                  shrinkWrap: true,
-                  physics: const NeverScrollableScrollPhysics(),
-                  crossAxisCount: 2,
-                  mainAxisSpacing: 15,
-                  crossAxisSpacing: 15,
-                  childAspectRatio: 1.1,
+                  shrinkWrap: true, physics: const NeverScrollableScrollPhysics(), crossAxisCount: 2, mainAxisSpacing: 15, crossAxisSpacing: 15, childAspectRatio: 1.1,
                   children: [
                     FeatureCard(icon: Icons.medical_services_outlined, title: "Diagnose", color: const Color(0xFF159A6C), onTap: () => _showPickerOptions(context)),
-                    FeatureCard(icon: Icons.grass, title: "My Crops", color: const Color(0xFF2ECC71), onTap: () {}),
+                    
+                    // --- NEW: Clicking this opens the dedicated History Screen! ---
+                    FeatureCard(
+                      icon: Icons.grass, 
+                      title: "My Crops", 
+                      color: const Color(0xFF2ECC71), 
+                      onTap: () {
+                        Navigator.push(context, MaterialPageRoute(builder: (context) => HistoryScreen(userName: userName)));
+                      }
+                    ),
                     FeatureCard(icon: Icons.wb_sunny_outlined, title: "Weather", color: const Color(0xFFFFA726), onTap: () {}),
                     FeatureCard(icon: Icons.people_outline, title: "Community", color: const Color(0xFF42A5F5), onTap: () {}),
                   ],
                 ),
-                const SizedBox(height: 30),
-
-                // --- HISTORY ---
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: [
-                    const Text("Your Scan History", style: TextStyle(fontSize: 22, fontWeight: FontWeight.bold, color: Color(0xFF1C2333))),
-                    TextButton(onPressed: () {}, child: const Text("See All", style: TextStyle(color: Color(0xFF159A6C)))),
-                  ],
-                ),
-                const SizedBox(height: 15),
-                const ActivityItem(cropName: "Tomato", status: "Healthy", date: "2 days ago", isHealthy: true),
-                const SizedBox(height: 12),
-                const ActivityItem(cropName: "Wheat", status: "Needs Attention", date: "5 days ago", isHealthy: false),
-                const SizedBox(height: 12),
-                const ActivityItem(cropName: "Corn", status: "Healthy", date: "1 week ago", isHealthy: true),
                 const SizedBox(height: 30),
               ],
             ),
@@ -255,7 +160,6 @@ class HomeScreen extends StatelessWidget {
   }
 }
 
-// Reusable Widgets
 class FeatureCard extends StatelessWidget {
   final IconData icon; final String title; final Color color; final VoidCallback onTap;
   const FeatureCard({super.key, required this.icon, required this.title, required this.color, required this.onTap});
@@ -267,8 +171,7 @@ class FeatureCard extends StatelessWidget {
       child: Material(
         color: Colors.transparent,
         child: InkWell(
-          onTap: onTap,
-          borderRadius: BorderRadius.circular(16),
+          onTap: onTap, borderRadius: BorderRadius.circular(16),
           child: Padding(
             padding: const EdgeInsets.all(20),
             child: Column(
@@ -281,31 +184,6 @@ class FeatureCard extends StatelessWidget {
             ),
           ),
         ),
-      ),
-    );
-  }
-}
-
-class ActivityItem extends StatelessWidget {
-  final String cropName; final String status; final String date; final bool isHealthy;
-  const ActivityItem({super.key, required this.cropName, required this.status, required this.date, required this.isHealthy});
-
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      padding: const EdgeInsets.all(16),
-      decoration: BoxDecoration(color: Colors.white, borderRadius: BorderRadius.circular(14), boxShadow: [BoxShadow(color: Colors.black.withOpacity(0.04), blurRadius: 8, offset: const Offset(0, 2))]),
-      child: Row(
-        children: [
-          Container(width: 12, height: 12, decoration: BoxDecoration(color: isHealthy ? const Color(0xFF2ECC71) : const Color(0xFFFFA726), shape: BoxShape.circle)),
-          const SizedBox(width: 16),
-          Expanded(child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-            Text(cropName, style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w600, color: Color(0xFF1C2333))),
-            const SizedBox(height: 4),
-            Text(status, style: TextStyle(fontSize: 14, color: isHealthy ? const Color(0xFF2ECC71) : const Color(0xFFFFA726), fontWeight: FontWeight.w500)),
-          ])),
-          Text(date, style: const TextStyle(fontSize: 13, color: Colors.grey)),
-        ],
       ),
     );
   }
