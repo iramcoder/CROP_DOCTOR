@@ -15,8 +15,10 @@ dependencies:
   image_picker: ^1.2.2
   http: ^1.6.0
   tflite_v2: ^1.0.0 # Added the offline AI Model interpreter plugin
-  path_provider: ^2.1.2 # Added to resolve temporary image file path errors
+  path_provider: ^2.1.5 # Added to resolve temporary image file path errors
   shared_preferences: ^2.5.5
+  hive: ^2.2.3
+  hive_flutter: ^1.1.0
 
 dev_dependencies:
   flutter_test:
