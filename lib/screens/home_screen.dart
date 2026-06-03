@@ -1,5 +1,6 @@
 // ============================================================================
 // SECTION 1: IMPORTS
+// Bringing in UI tools, database tools, and our destination screens.
 // ============================================================================
 import 'dart:typed_data';
 import 'package:flutter/material.dart';
@@ -7,13 +8,23 @@ import 'package:image_picker/image_picker.dart';
 import 'diagnose_screen.dart';
 import 'login_screen.dart'; 
 import 'history_screen.dart'; 
+import 'diseases_screen.dart'; // NEW: Imported to link the new Encyclopedia page!
 
+// ============================================================================
+// SECTION 2: THE MAIN HOME SCREEN WIDGET
+// Uses a StatelessWidget because the UI values remain constant on this screen.
+// ============================================================================
 class HomeScreen extends StatelessWidget {
-  final String userName; 
-  final bool isNewUser; // --- NEW: Accepts the flag from the login screen
+  final String userName; // Catch the active user's name passed from Login Screen
+  final bool isNewUser;  // Catch the new/existing user flag to display the correct greeting
 
   const HomeScreen({super.key, required this.userName, this.isNewUser = false});
 
+  // ==========================================================================
+  // SECTION 3: HELPER METHODS FOR CAMERA & GALLERY
+  // ==========================================================================
+  
+  // Shows a clean pop-up menu at the bottom asking the user to choose their input source
   void _showPickerOptions(BuildContext context) {
     showModalBottomSheet(
       context: context,
@@ -41,6 +52,7 @@ class HomeScreen extends StatelessWidget {
     );
   }
 
+  // Opens camera/gallery, compresses the image automatically to avoid memory crashes, and pushes to DiagnoseScreen
   Future<void> _pickAndNavigate(BuildContext context, ImageSource source) async {
     try {
       final ImagePicker picker = ImagePicker();
@@ -60,6 +72,9 @@ class HomeScreen extends StatelessWidget {
     }
   }
 
+  // ==========================================================================
+  // SECTION 4: USER INTERFACE BUILD METHOD
+  // ==========================================================================
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -73,26 +88,34 @@ class HomeScreen extends StatelessWidget {
               children: [
                 const SizedBox(height: 20),
 
-                // --- HEADER WITH DYNAMIC GREETING ---
+                // --- HEADER WITH DYNAMIC GREETING & SWITCH ACCOUNT BUTTON ---
                 Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
                     Text(
-                      // --- NEW: DYNAMIC TEXT LOGIC ---
+                      // Uses the isNewUser flag to display custom greetings dynamically!
                       isNewUser 
                           ? "Welcome,\n$userName!" 
                           : "Welcome back,\n$userName!", 
                       style: const TextStyle(fontSize: 28, fontWeight: FontWeight.bold, color: Color(0xFF1C2333), height: 1.3)
                     ),
                     InkWell(
-                      onTap: () { Navigator.pushAndRemoveUntil(context, MaterialPageRoute(builder: (context) => const LoginScreen()), (route) => false); },
+                      onTap: () { 
+                        // Safely wipes navigation memory and drops back to the login selector
+                        Navigator.pushAndRemoveUntil(context, MaterialPageRoute(builder: (context) => const LoginScreen()), (route) => false); 
+                      },
                       borderRadius: BorderRadius.circular(24),
-                      child: Container(padding: const EdgeInsets.all(12), decoration: BoxDecoration(color: const Color(0xFF159A6C).withOpacity(0.15), shape: BoxShape.circle), child: const Icon(Icons.swap_horiz, color: Color(0xFF159A6C), size: 28)),
+                      child: Container(
+                        padding: const EdgeInsets.all(12), 
+                        decoration: BoxDecoration(color: const Color(0xFF159A6C).withOpacity(0.15), shape: BoxShape.circle), 
+                        child: const Icon(Icons.swap_horiz, color: Color(0xFF159A6C), size: 28)
+                      ),
                     ),
                   ],
                 ),
                 const SizedBox(height: 25),
 
+                // --- DECORATIVE SEARCH BAR ---
                 TextField(
                   decoration: InputDecoration(
                     hintText: "Search crops, diseases...", hintStyle: const TextStyle(color: Colors.grey), prefixIcon: const Icon(Icons.search, color: Colors.grey),
@@ -102,6 +125,7 @@ class HomeScreen extends StatelessWidget {
                 ),
                 const SizedBox(height: 20),
 
+                // --- MAIN CTAS: SCAN A PLANT BUTTON ---
                 GestureDetector(
                   onTap: () => _showPickerOptions(context),
                   child: Container(
@@ -118,6 +142,7 @@ class HomeScreen extends StatelessWidget {
                 ),
                 const SizedBox(height: 25),
 
+                // --- BANNER INTERCARD ---
                 Container(
                   width: double.infinity, padding: const EdgeInsets.all(20),
                   decoration: BoxDecoration(gradient: const LinearGradient(colors: [Color(0xFF159A6C), Color(0xFF1DB87A)], begin: Alignment.topLeft, end: Alignment.bottomRight), borderRadius: BorderRadius.circular(20)),
@@ -136,22 +161,40 @@ class HomeScreen extends StatelessWidget {
                 ),
                 const SizedBox(height: 30),
 
+                // --- THE REORDERED FEATURE GRID ---
                 GridView.count(
-                  shrinkWrap: true, physics: const NeverScrollableScrollPhysics(), crossAxisCount: 2, mainAxisSpacing: 15, crossAxisSpacing: 15, childAspectRatio: 1.1,
+                  shrinkWrap: true, 
+                  physics: const NeverScrollableScrollPhysics(), 
+                  crossAxisCount: 2, 
+                  mainAxisSpacing: 15, 
+                  crossAxisSpacing: 15, 
+                  childAspectRatio: 1.1,
                   children: [
+                    // 1. My Crops (Navigates directly to your Offline local Scan History)
                     FeatureCard(
                       icon: Icons.grass, 
                       title: "My Crops", 
                       color: const Color(0xFF2ECC71), 
                       onTap: () { Navigator.push(context, MaterialPageRoute(builder: (context) => HistoryScreen(userName: userName))); }
                     ),
+                    
+                    // 2. Diseases (Navigates directly to the brand new Diseases Encyclopedia)
                     FeatureCard(
                       icon: Icons.healing_outlined, 
                       title: "Diseases", 
                       color: const Color(0xFFE74C3C), 
-                      onTap: () { ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text("Diseases encyclopedia coming soon!"))); }
+                      onTap: () {
+                        Navigator.push(
+                          context, 
+                          MaterialPageRoute(builder: (context) => const DiseasesScreen())
+                        );
+                      }
                     ),
+                    
+                    // 3. Weather
                     FeatureCard(icon: Icons.wb_sunny_outlined, title: "Weather", color: const Color(0xFFFFA726), onTap: () {}),
+                    
+                    // 4. Community
                     FeatureCard(icon: Icons.people_outline, title: "Community", color: const Color(0xFF42A5F5), onTap: () {}),
                   ],
                 ),
@@ -165,6 +208,9 @@ class HomeScreen extends StatelessWidget {
   }
 }
 
+// ============================================================================
+// SECTION 5: CUSTOM REUSABLE GRID ELEMENT
+// ============================================================================
 class FeatureCard extends StatelessWidget {
   final IconData icon; final String title; final Color color; final VoidCallback onTap;
   const FeatureCard({super.key, required this.icon, required this.title, required this.color, required this.onTap});
