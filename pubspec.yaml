@@ -16,6 +16,7 @@ dependencies:
   http: ^1.6.0
   tflite_v2: ^1.0.0 # Added the offline AI Model interpreter plugin
   path_provider: ^2.1.2 # Added to resolve temporary image file path errors
+  shared_preferences: ^2.5.5
 
 dev_dependencies:
   flutter_test:
