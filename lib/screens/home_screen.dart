@@ -10,7 +10,7 @@ import 'login_screen.dart';
 import 'history_screen.dart'; 
 import 'diseases_screen.dart'; // Handles symptoms, causes, and impacts of crop diseases
 import 'treatments_screen.dart'; // Handles organic, chemical, and preventative treatments
-import 'community_screen.dart'; // NEW: Handles the offline device user leaderboard!
+import 'community_screen.dart'; // Handles the offline device user leaderboard!
 
 // ============================================================================
 // SECTION 2: THE MAIN HOME SCREEN WIDGET
@@ -134,7 +134,7 @@ class HomeScreen extends StatelessWidget {
                     width: double.infinity, padding: const EdgeInsets.symmetric(vertical: 18, horizontal: 16),
                     decoration: BoxDecoration(color: const Color(0xFF159A6C).withOpacity(0.12), border: Border.all(color: const Color(0xFF159A6C), width: 1.5), borderRadius: BorderRadius.circular(16)),
                     child: const Row(
-                      mainAxisAlignment: Main => MainAxisAlignment.center,
+                      mainAxisAlignment: MainAxisAlignment.center,
                       children: [
                         Icon(Icons.document_scanner_outlined, color: Color(0xFF159A6C), size: 28), const SizedBox(width: 12),
                         Text("Scan a Plant", style: TextStyle(color: Color(0xFF159A6C), fontWeight: FontWeight.bold, fontSize: 18)),
@@ -180,7 +180,7 @@ class HomeScreen extends StatelessWidget {
                       onTap: () { Navigator.push(context, MaterialPageRoute(builder: (context) => HistoryScreen(userName: userName))); }
                     ),
                     
-                    // 2. Diseases (Navigates directly to the Diseases Encyclopedia)
+                    // 2. Diseases (Navigates directly to the brand new Diseases Encyclopedia)
                     FeatureCard(
                       icon: Icons.coronavirus_outlined, // Better icon for disease recognition
                       title: "Diseases", 
@@ -206,7 +206,7 @@ class HomeScreen extends StatelessWidget {
                       }
                     ),
                     
-                    // 4. Community (NEW: Navigates to the local Community Leaderboard)
+                    // 4. Community (Navigates to the local Community Leaderboard)
                     FeatureCard(
                       icon: Icons.people_outline, 
                       title: "Community", 
