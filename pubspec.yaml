@@ -1,0 +1,32 @@
+name: doc_crop
+description: "A new Flutter project."
+publish_to: "none"
+
+version: 1.0.0+1
+
+environment:
+  sdk: ^3.11.1
+
+dependencies:
+  flutter:
+    sdk: flutter
+
+  cupertino_icons: ^1.0.8
+  image_picker: ^1.2.2
+  http: ^1.6.0
+  tflite_v2: ^1.0.0 # Added the offline AI Model interpreter plugin
+  path_provider: ^2.1.2 # Added to resolve temporary image file path errors
+
+dev_dependencies:
+  flutter_test:
+    sdk: flutter
+  flutter_lints: ^6.0.0
+
+flutter:
+  uses-material-design: true
+
+  # Configured assets so your Flutter code can read these local files
+  assets:
+    - assets/logo.jpg
+    - assets/model.tflite
+    - assets/labels.txt
