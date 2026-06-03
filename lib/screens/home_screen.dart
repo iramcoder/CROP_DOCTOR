@@ -6,11 +6,13 @@ import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
 import 'diagnose_screen.dart';
 import 'login_screen.dart'; 
-import 'history_screen.dart'; // NEW: Imported to navigate to history
+import 'history_screen.dart'; 
 
 class HomeScreen extends StatelessWidget {
   final String userName; 
-  const HomeScreen({super.key, required this.userName});
+  final bool isNewUser; // --- NEW: Accepts the flag from the login screen
+
+  const HomeScreen({super.key, required this.userName, this.isNewUser = false});
 
   void _showPickerOptions(BuildContext context) {
     showModalBottomSheet(
@@ -48,7 +50,6 @@ class HomeScreen extends StatelessWidget {
         final Uint8List imageBytes = await image.readAsBytes();
         if (!context.mounted) return;
 
-        // Pass the photo and the user's name to the AI engine
         Navigator.push(
           context,
           MaterialPageRoute(builder: (context) => DiagnoseScreen(imageBytes: imageBytes, userName: userName)),
@@ -59,9 +60,6 @@ class HomeScreen extends StatelessWidget {
     }
   }
 
-  // ==========================================================================
-  // SECTION 3: USER INTERFACE
-  // ==========================================================================
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -75,10 +73,17 @@ class HomeScreen extends StatelessWidget {
               children: [
                 const SizedBox(height: 20),
 
+                // --- HEADER WITH DYNAMIC GREETING ---
                 Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
-                    Text("Good Morning,\n$userName!", style: const TextStyle(fontSize: 28, fontWeight: FontWeight.bold, color: Color(0xFF1C2333), height: 1.3)),
+                    Text(
+                      // --- NEW: DYNAMIC TEXT LOGIC ---
+                      isNewUser 
+                          ? "Welcome,\n$userName!" 
+                          : "Welcome back,\n$userName!", 
+                      style: const TextStyle(fontSize: 28, fontWeight: FontWeight.bold, color: Color(0xFF1C2333), height: 1.3)
+                    ),
                     InkWell(
                       onTap: () { Navigator.pushAndRemoveUntil(context, MaterialPageRoute(builder: (context) => const LoginScreen()), (route) => false); },
                       borderRadius: BorderRadius.circular(24),
@@ -131,20 +136,20 @@ class HomeScreen extends StatelessWidget {
                 ),
                 const SizedBox(height: 30),
 
-                // --- FEATURE GRID ---
                 GridView.count(
                   shrinkWrap: true, physics: const NeverScrollableScrollPhysics(), crossAxisCount: 2, mainAxisSpacing: 15, crossAxisSpacing: 15, childAspectRatio: 1.1,
                   children: [
-                    FeatureCard(icon: Icons.medical_services_outlined, title: "Diagnose", color: const Color(0xFF159A6C), onTap: () => _showPickerOptions(context)),
-                    
-                    // --- NEW: Clicking this opens the dedicated History Screen! ---
                     FeatureCard(
                       icon: Icons.grass, 
                       title: "My Crops", 
                       color: const Color(0xFF2ECC71), 
-                      onTap: () {
-                        Navigator.push(context, MaterialPageRoute(builder: (context) => HistoryScreen(userName: userName)));
-                      }
+                      onTap: () { Navigator.push(context, MaterialPageRoute(builder: (context) => HistoryScreen(userName: userName))); }
+                    ),
+                    FeatureCard(
+                      icon: Icons.healing_outlined, 
+                      title: "Diseases", 
+                      color: const Color(0xFFE74C3C), 
+                      onTap: () { ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text("Diseases encyclopedia coming soon!"))); }
                     ),
                     FeatureCard(icon: Icons.wb_sunny_outlined, title: "Weather", color: const Color(0xFFFFA726), onTap: () {}),
                     FeatureCard(icon: Icons.people_outline, title: "Community", color: const Color(0xFF42A5F5), onTap: () {}),
