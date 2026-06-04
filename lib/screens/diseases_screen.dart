@@ -112,7 +112,7 @@ class DiseasesScreen extends StatelessWidget {
           const SizedBox(height: 25),
           _buildCropSection("Rice Diseases", Icons.spa, const Color(0xFF1ABC9C), db["Rice"]!),
           const SizedBox(height: 25),
-          _buildCropSection("Wheat Diseases", Icons.wheat_arena, const Color(0xFFE67E22), db["Wheat"]!),
+          _buildCropSection("Wheat Diseases", Icons.eco, const Color(0xFFE67E22), db["Wheat"]!), // Swapped to universally compatible Icons.eco
           const SizedBox(height: 40),
         ],
       ),
