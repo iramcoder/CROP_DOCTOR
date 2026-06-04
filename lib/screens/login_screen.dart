@@ -1,20 +1,25 @@
 import 'package:flutter/material.dart';
 import 'package:hive_flutter/hive_flutter.dart';
 import 'home_screen.dart';
+
 class LoginScreen extends StatefulWidget {
   const LoginScreen({super.key});
+
   @override
   State<LoginScreen> createState() => _LoginScreenState();
 }
+
 class _LoginScreenState extends State<LoginScreen> {
   final TextEditingController _newUserController = TextEditingController();
   List<String> existingUsers = [];
   final _userBox = Hive.box('user_database');
+
   @override
   void initState() {
     super.initState();
     _loadUsers();
   }
+
   void _loadUsers() {
     List<dynamic>? savedData = _userBox.get('users_list');
     setState(() {
@@ -28,6 +33,7 @@ class _LoginScreenState extends State<LoginScreen> {
       }
     });
   }
+
   void _saveNewUser(String name) {
     if (!existingUsers.contains(name)) {
       setState(() => existingUsers.add(name));
@@ -36,6 +42,7 @@ class _LoginScreenState extends State<LoginScreen> {
       _userBox.put('users_list', listToSave);
     }
   }
+
   void _loginAsUser(String userName, {bool isNewUser = false}) {
     Navigator.pushReplacement(
       context,
@@ -44,6 +51,7 @@ class _LoginScreenState extends State<LoginScreen> {
       ),
     );
   }
+
   void _createNewUser() {
     String newName = _newUserController.text.trim();
     if (newName.isNotEmpty) {
@@ -69,13 +77,12 @@ class _LoginScreenState extends State<LoginScreen> {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 const SizedBox(height: 50),
-                const Text("Crop Doctor", style: TextStyle(fontSize: 32, fontWeight: FontWeight.bold, color: Color(0xFF159A6C))),
+                const Text("Crop Doc", style: TextStyle(fontSize: 32, fontWeight: FontWeight.bold, color: Color(0xFF159A6C))),
                 const SizedBox(height: 8),
                 const Text("Who is using the app today?", style: TextStyle(fontSize: 16, color: Colors.grey)),
                 const SizedBox(height: 40),
                 const Text("EXISTING PROFILES", style: TextStyle(fontWeight: FontWeight.bold, color: Colors.grey, fontSize: 12, letterSpacing: 1.2)),
                 const SizedBox(height: 15),
-
                 ListView.builder(
                   shrinkWrap: true,
                   physics: const NeverScrollableScrollPhysics(),
@@ -110,7 +117,6 @@ class _LoginScreenState extends State<LoginScreen> {
                     );
                   },
                 ),
-
                 const SizedBox(height: 25),
                 const Row(
                   children: [
@@ -123,10 +129,8 @@ class _LoginScreenState extends State<LoginScreen> {
                   ],
                 ),
                 const SizedBox(height: 25),
-
                 const Text("CREATE NEW PROFILE", style: TextStyle(fontWeight: FontWeight.bold, color: Colors.grey, fontSize: 12, letterSpacing: 1.2)),
                 const SizedBox(height: 15),
-
                 TextField(
                   controller: _newUserController,
                   decoration: InputDecoration(
@@ -138,9 +142,7 @@ class _LoginScreenState extends State<LoginScreen> {
                     border: OutlineInputBorder(borderRadius: BorderRadius.circular(14), borderSide: BorderSide.none),
                   ),
                 ),
-
                 const SizedBox(height: 15),
-
                 SizedBox(
                   width: double.infinity,
                   height: 55,
@@ -151,10 +153,10 @@ class _LoginScreenState extends State<LoginScreen> {
                       elevation: 0,
                     ),
                     onPressed: _createNewUser,
-                    child: const Text("Create Profile & Start", style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
+                    // FIXED: Explicitly forced the text color to white to override Flutter's default purple!
+                    child: const Text("Create Profile & Start", style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold, color: Colors.white)),
                   ),
                 ),
-
                 const SizedBox(height: 40),
               ],
             ),

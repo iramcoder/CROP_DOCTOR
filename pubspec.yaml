@@ -1,7 +1,6 @@
 name: doc_crop
 description: "A new Flutter project."
 publish_to: "none"
-
 version: 1.0.0+1
 
 environment:
@@ -10,7 +9,6 @@ environment:
 dependencies:
   flutter:
     sdk: flutter
-
   cupertino_icons: ^1.0.8
   image_picker: ^1.2.2
   http: ^1.6.0
@@ -24,12 +22,27 @@ dev_dependencies:
   flutter_test:
     sdk: flutter
   flutter_lints: ^6.0.0
+  # Added the launcher icon builder package
+  flutter_launcher_icons: ^0.13.1
+
+# Launcher Icon Configuration with a solid White Background
+flutter_launcher_icons:
+  android: "launcher_icon"
+  ios: true
+  image_path: "assets/logo.png"
+  # This sets the solid white background behind your transparent logo for Android
+  adaptive_icon_background: "#FFFFFF" 
+  adaptive_icon_foreground: "assets/logo.png"
+  # This strips alpha transparency for iOS and fills it with solid white
+  remove_alpha_ios: true 
+  background_color_ios: "#FFFFFF"
+  min_sdk_android: 21
 
 flutter:
   uses-material-design: true
 
   # Configured assets so your Flutter code can read these local files
   assets:
-    - assets/logo.jpg
+    - assets/logo.png  # Changed from logo.jpg to match your transparent PNG logo
     - assets/model.tflite
     - assets/labels.txt

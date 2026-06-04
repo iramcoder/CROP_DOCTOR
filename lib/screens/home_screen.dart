@@ -59,11 +59,10 @@ class HomeScreen extends StatelessWidget {
     try {
       final ImagePicker picker = ImagePicker();
       final XFile? image = await picker.pickImage(source: source, maxWidth: 1080, imageQuality: 80);
-
+      
       if (image != null) {
         final Uint8List imageBytes = await image.readAsBytes();
         if (!context.mounted) return;
-
         Navigator.push(
           context,
           MaterialPageRoute(builder: (context) => DiagnoseScreen(imageBytes: imageBytes, userName: userName)),
@@ -88,8 +87,8 @@ class HomeScreen extends StatelessWidget {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                const SizedBox(height: 20),
-
+                const SizedBox(height: 30),
+                
                 // --- HEADER WITH DYNAMIC GREETING & PROFILE SWAP ACTION ---
                 Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -115,18 +114,9 @@ class HomeScreen extends StatelessWidget {
                     ),
                   ],
                 ),
-                const SizedBox(height: 25),
-
-                // --- DECORATIVE SEARCH BAR ---
-                TextField(
-                  decoration: InputDecoration(
-                    hintText: "Search crops, diseases...", hintStyle: const TextStyle(color: Colors.grey), prefixIcon: const Icon(Icons.search, color: Colors.grey),
-                    filled: true, fillColor: Colors.white, contentPadding: const EdgeInsets.symmetric(vertical: 16, horizontal: 20),
-                    border: OutlineInputBorder(borderRadius: BorderRadius.circular(14), borderSide: BorderSide.none),
-                  ),
-                ),
-                const SizedBox(height: 20),
-
+                
+                const SizedBox(height: 35),
+                
                 // --- MAIN CTAS: SCAN A PLANT BUTTON ---
                 GestureDetector(
                   onTap: () => _showPickerOptions(context),
@@ -142,8 +132,9 @@ class HomeScreen extends StatelessWidget {
                     ),
                   ),
                 ),
+                
                 const SizedBox(height: 25),
-
+                
                 // --- PROMOTIONAL BANNER ---
                 Container(
                   width: double.infinity, padding: const EdgeInsets.all(20),
@@ -161,8 +152,9 @@ class HomeScreen extends StatelessWidget {
                     ],
                   ),
                 ),
+                
                 const SizedBox(height: 30),
-
+                
                 // --- THE REORDERED FEATURE GRID ---
                 GridView.count(
                   shrinkWrap: true, 
