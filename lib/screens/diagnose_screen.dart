@@ -8,7 +8,6 @@ import 'package:tflite_v2/tflite_v2.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:hive_flutter/hive_flutter.dart'; 
 import 'login_screen.dart'; 
-import 'treatments_screen.dart';
 
 class DiagnoseScreen extends StatefulWidget {
   final Uint8List imageBytes;
@@ -37,6 +36,7 @@ class _DiagnoseScreenState extends State<DiagnoseScreen> {
     _saveBytesToTempFile();
   }
 
+  // Loads your new model.tflite and labels.txt from the assets folder
   Future<void> _loadModel() async {
     try {
       await Tflite.loadModel(
@@ -59,25 +59,25 @@ class _DiagnoseScreenState extends State<DiagnoseScreen> {
   }
 
   // ==========================================================================
-  // SECTION 4: AI INFERENCE ENGINE (Updated for Django Python Model)
+  // SECTION 4: AI INFERENCE ENGINE
   // ==========================================================================
   Future<void> runAiAnalysis() async {
     if (_tempImageFile == null) return;
     setState(() { isLoading = true; });
 
     try {
-      // Configured specifically for Keras/Python normalized models (Pixels divided by 255)
+      // Preprocessing config adjusted for standard Keras/Python [0.0 to 1.0] scaling
       var recognitions = await Tflite.runModelOnImage(
         path: _tempImageFile!.path,
-        imageMean: 0.0,    // Changed to 0.0 for standard Python models
-        imageStd: 255.0,   // Changed to 255.0 to scale pixels between 0 and 1
-        numResults: 15,    // Matches the 15 classes in labels.txt
+        imageMean: 0.0,    // Normalization mean set to 0.0 for Python TFLite models
+        imageStd: 255.0,   // Divides raw 0-255 pixels by 255.0 to yield a 0.0-1.0 range
+        numResults: 15,    // Set to 15 to map to the 15 classes in your new labels.txt
         threshold: 0.1,    
         asynch: true,
       );
 
       if (recognitions != null && recognitions.isNotEmpty) {
-        // 1. Clean the label (removes leading digits like "0 Corn___Common_Rust")
+        // 1. Strip out the leading digits (e.g., "0 Corn___Common_Rust" -> "Corn___Common_Rust")
         String label = recognitions[0]['label'].replaceAll(RegExp(r'^[0-9]+\s'), '').trim();
         double conf = recognitions[0]['confidence'];
 
@@ -85,24 +85,22 @@ class _DiagnoseScreenState extends State<DiagnoseScreen> {
         String disease = "Unknown Status";
         bool healthy = false;
 
-        // 2. Handle the "Invalid" class (Label 4)
+        // 2. Safely parse the "Invalid" class (Label 4)
         if (label.toLowerCase() == "invalid") {
           crop = "Unrecognized";
           disease = "Not a valid leaf";
         } else {
-          // 3. Parse the specific format (e.g. "Corn___Common_Rust")
+          // 3. Parse the new underscore layout (e.g., "Corn___Common_Rust" -> Crop: "Corn", Disease: "Common Rust")
           List<String> parts = label.split('___');
           
           if (parts.isNotEmpty) {
-            // Replace single underscores with spaces for the crop
             crop = parts[0].replaceAll('_', ' '); 
             
             if (parts.length > 1) {
-              // Replace single underscores with spaces for the disease
-              disease = parts[1].replaceAll('_', ' '); 
+              disease = parts[1].replaceAll('_', ' '); // <--- FIXED: Safely parsing item index [1]
             }
           }
-          // Determine if it's a healthy leaf
+          // Scan history expects a standard check for the word 'healthy'
           healthy = disease.toLowerCase().contains("healthy");
         }
 
@@ -120,12 +118,11 @@ class _DiagnoseScreenState extends State<DiagnoseScreen> {
         userHistory.insert(0, newScan);
         historyBox.put(widget.userName, userHistory);
 
-        // 5. Update UI state
+        // 5. Update UI
         setState(() {
           rawLabel = label; 
           cropName = crop;
           diseaseName = healthy ? "Healthy Crop" : disease;
-          // If the model caught an invalid image, mark it as Failed. Otherwise, use health status.
           status = (healthy || crop == "Unrecognized") ? (healthy ? "Healthy" : "Failed") : "Needs Attention";
           confidence = (conf * 100).toInt();
           isLoading = false;
@@ -164,7 +161,6 @@ class _DiagnoseScreenState extends State<DiagnoseScreen> {
               const Text("AI Analysis Results", style: TextStyle(fontSize: 22, fontWeight: FontWeight.bold, color: Color(0xFF1C2333))),
               const SizedBox(height: 15),
               
-              // --- RESULTS CARD ---
               Container(
                 width: double.infinity, padding: const EdgeInsets.all(20),
                 decoration: BoxDecoration(color: Colors.white, borderRadius: BorderRadius.circular(16), boxShadow: [BoxShadow(color: Colors.black.withOpacity(0.05), blurRadius: 10, offset: const Offset(0, 4))]),
@@ -181,7 +177,7 @@ class _DiagnoseScreenState extends State<DiagnoseScreen> {
               ),
               const SizedBox(height: 30),
 
-              // --- MAIN ACTION BUTTON (See Treatments / Run Scan) ---
+              // Main button to trigger AI analysis
               SizedBox(
                 width: double.infinity,
                 height: 58,
@@ -194,7 +190,7 @@ class _DiagnoseScreenState extends State<DiagnoseScreen> {
                       ? null
                       : (hasScanned
                             ? () { 
-                                // Disable treatment screen if the image was invalid
+                                // Show a message if they try to click "See Treatments" on an invalid card
                                 if (cropName == "Unrecognized") {
                                   ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text("Cannot show treatments for an invalid image.")));
                                   return;
@@ -213,7 +209,7 @@ class _DiagnoseScreenState extends State<DiagnoseScreen> {
               
               const SizedBox(height: 15),
 
-              // --- SECONDARY ACTION BUTTONS (Scan New & Change Profile) ---
+              // Vertical actions: Scan New & Change Profile
               if (!isLoading) ...[
                 SizedBox(
                   width: double.infinity,
@@ -268,6 +264,64 @@ class ResultRow extends StatelessWidget {
         Text(label, style: const TextStyle(fontSize: 16, color: Colors.grey, fontWeight: FontWeight.w500)), const SizedBox(width: 16),
         Expanded(child: Text(value, textAlign: TextAlign.right, style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold, color: isAlert ? const Color(0xFFE74C3C) : const Color(0xFF1C2333)))),
       ],
+    );
+  }
+}
+
+// =========================================================================
+// SECTION 6: DEDICATED TREATMENT SCREEN
+// =========================================================================
+class TreatmentScreen extends StatelessWidget {
+  final String crop;
+  final String disease;
+  final String labelKey;
+  final bool isHealthy;
+
+  const TreatmentScreen({
+    super.key,
+    required this.crop,
+    required this.disease,
+    required this.labelKey,
+    required this.isHealthy,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      backgroundColor: const Color(0xFFF4F6F5),
+      appBar: AppBar(
+        title: const Text('Treatment Guide', style: TextStyle(color: Colors.black)),
+        backgroundColor: Colors.white,
+        elevation: 0,
+        iconTheme: const IconThemeData(color: Colors.black),
+      ),
+      body: Center(
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            const Icon(Icons.info_outline, size: 60, color: Color(0xFF159A6C)),
+            const SizedBox(height: 15),
+            Text(
+              "Diagnosis: $crop",
+              style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+            ),
+            const SizedBox(height: 5),
+            Text(
+              disease,
+              style: const TextStyle(fontSize: 16, color: Colors.grey),
+            ),
+            const SizedBox(height: 25),
+            const Padding(
+              padding: EdgeInsets.symmetric(horizontal: 40.0),
+              child: Text(
+                "Detailed offline treatment plans for this model are being finalized. Check back in the next update!",
+                textAlign: TextAlign.center,
+                style: TextStyle(fontSize: 14, color: Colors.grey),
+              ),
+            ),
+          ],
+        ),
+      ),
     );
   }
 }
