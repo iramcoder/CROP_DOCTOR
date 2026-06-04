@@ -85,34 +85,36 @@ class _DiagnoseScreenState extends State<DiagnoseScreen> {
 
       if (recognitions != null && recognitions.isNotEmpty) {
         
-        // 1. Clean the label (removes leading digits like "0 Corn___Common_Rust")
-        String label = recognitions[0]['label'].replaceAll(RegExp(r'^[0-9]+\s'), '').trim();
+        // 1. Extract the raw label (e.g., "12 Wheat___Brown_Rust")
+        String rawLabelStr = recognitions[0]['label'].trim();
         double conf = recognitions[0]['confidence'];
 
         String crop = "Unknown";
         String disease = "Unknown Status";
         bool healthy = false;
 
-        // 2. Safely parse the "Invalid" class (Label 4)
-        if (label.toLowerCase() == "invalid") {
+        // 2. Handle "Invalid"
+        if (rawLabelStr.toLowerCase().contains("invalid")) {
           crop = "Unrecognized";
           disease = "Not a valid leaf";
         } else {
-          // 3. Parse the new underscore layout (e.g., "Corn___Common_Rust" -> Crop: "Corn", Disease: "Common Rust")
-          List<String> parts = label.split('___');
+          // 3. Strip any leading digits and underscores (e.g., "12 Wheat___" -> "Wheat___")
+          String cleanLabel = rawLabelStr.replaceAll(RegExp(r'^\d+\s*'), '').trim();
+
+          // 4. Split by the triple underscores "___"
+          List<String> parts = cleanLabel.split('___');
           
           if (parts.isNotEmpty) {
-            crop = parts[0].replaceAll('_', ' '); 
+            crop = parts[0].replaceAll('_', ' '); // E.g., "Wheat"
             
             if (parts.length > 1) {
-              disease = parts[1].replaceAll('_', ' '); 
+              disease = parts[1].replaceAll('_', ' '); // E.g., "Brown Rust"
             }
           }
-          // Check for the word 'healthy' to determine status
           healthy = disease.toLowerCase().contains("healthy");
         }
 
-        // 4. Save to Database History
+        // 5. Save to Database History
         final historyBox = Hive.box('scan_history');
         List<dynamic> userHistory = historyBox.get(widget.userName, defaultValue: []);
         
@@ -126,9 +128,9 @@ class _DiagnoseScreenState extends State<DiagnoseScreen> {
         userHistory.insert(0, newScan);
         historyBox.put(widget.userName, userHistory);
 
-        // 5. Update UI
+        // 6. Update UI
         setState(() {
-          rawLabel = label; 
+          rawLabel = rawLabelStr; 
           cropName = crop;
           diseaseName = healthy ? "Healthy Crop" : disease;
           status = (healthy || crop == "Unrecognized") ? (healthy ? "Healthy" : "Failed") : "Needs Attention";
