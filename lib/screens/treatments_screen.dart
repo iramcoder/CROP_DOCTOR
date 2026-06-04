@@ -8,16 +8,27 @@ class TreatmentsScreen extends StatelessWidget {
 
   // ==========================================================================
   // SECTION 2: TREATMENT DATABASE
-  // Grouped by Crop. Contains Organic, Chemical, and Preventative measures.
   // ==========================================================================
   Map<String, List<Map<String, dynamic>>> _getTreatmentDatabase() {
     return {
-      "Pepper": [
+      "Corn": [
         {
-          "disease": "Bacterial Spot",
-          "organic": ["Prune and destroy infected leaves", "Spray with copper-based organic fungicides"],
-          "chemical": ["Apply Copper hydroxide sprays", "Apply Streptomycin if permitted"],
-          "prevention": ["Rotate crops annually", "Avoid overhead watering"]
+          "disease": "Common Rust",
+          "organic": ["Apply neem oil or sulfur-based organic sprays", "Remove infected foliage near garden plants"],
+          "chemical": ["Apply preventative fungicides containing Pyraclostrobin or Azoxystrobin"],
+          "prevention": ["Plant resistant corn hybrids", "Destroy infected crop residues after harvest"]
+        },
+        {
+          "disease": "Gray Leaf Spot",
+          "organic": ["Apply Bacillus subtilis bio-fungicide sprays", "Rotate crops away from grass families"],
+          "chemical": ["Apply strobilurin or triazole group fungicides (e.g., Propiconazole)"],
+          "prevention": ["Avoid no-till farming in infected fields", "Maintain highly balanced soil nitrogen"]
+        },
+        {
+          "disease": "Northern Leaf Blight",
+          "organic": ["Apply biological fungicides as preventative measures", "Ensure clean tillage to bury residues"],
+          "chemical": ["Use foliar fungicides containing Azoxystrobin or Propiconazole"],
+          "prevention": ["Choose disease-resistant hybrids", "Rotate with non-host crops like soybeans"]
         }
       ],
       "Potato": [
@@ -29,65 +40,43 @@ class TreatmentsScreen extends StatelessWidget {
         },
         {
           "disease": "Late Blight",
-          "organic": ["Destroy all infected plants immediately", "Apply Copper sprays as a preventative"],
+          "organic": ["Destroy all infected plants immediately (do not compost)", "Apply Copper sprays as a preventative"],
           "chemical": ["Apply systemic fungicides like Mefenoxam or Chlorothalonil immediately"],
           "prevention": ["Plant resistant potato varieties", "Destroy cull piles"]
         }
       ],
-      "Tomato": [
+      "Rice": [
         {
-          "disease": "Bacterial Spot",
-          "organic": ["Remove heavily infected foliage", "Use a fixed-copper organic spray"],
-          "chemical": ["Apply Copper-based bactericides combined with Mancozeb"],
-          "prevention": ["Water at the base of the plant only", "Disinfect gardening tools"]
+          "disease": "Brown Spot",
+          "organic": ["Apply balanced organic compost to correct soil deficiencies", "Use healthy, disease-free seed batches"],
+          "chemical": ["Treat seeds with Captan or Thiram", "Apply Propiconazole or Edifenphos foliar spray"],
+          "prevention": ["Apply proper potassium and zinc fertilizers", "Keep fields well-drained"]
         },
         {
-          "disease": "Early Blight",
-          "organic": ["Trim lower leaves touching the soil", "Apply Neem oil or Bacillus subtilis"],
-          "chemical": ["Spray with Chlorothalonil or Copper fungicides every 7 days"],
-          "prevention": ["Use mulch to prevent soil splashing", "Stake or cage tomatoes"]
+          "disease": "Leaf Blast",
+          "organic": ["Avoid excessive water logging", "Burn or deeply plow infected crop straw after harvest"],
+          "chemical": ["Treat seeds with Tricyclazole", "Apply Isoprothiolane"],
+          "prevention": ["Avoid excessive nitrogen fertilizer application", "Plant blast-resistant rice cultivars"]
         },
         {
-          "disease": "Late Blight",
-          "organic": ["Pull up and destroy infected plants immediately", "Apply preventative Copper spray"],
-          "chemical": ["Apply Mancozeb, Chlorothalonil, or Copper fungicides"],
-          "prevention": ["Keep foliage dry", "Ensure excellent air circulation"]
+          "disease": "Neck Blast",
+          "organic": ["Control weeds near fields", "Manage water levels carefully"],
+          "chemical": ["Apply Kasugamycin or Tricyclazole if Neck Blast appears"],
+          "prevention": ["Avoid excessive nitrogen fertilizer application", "Plant blast-resistant rice cultivars"]
+        }
+      ],
+      "Wheat": [
+        {
+          "disease": "Brown Rust",
+          "organic": ["Apply botanical sprays like Neem oil or Garlic extract", "Remove alternative weed hosts"],
+          "chemical": ["Apply systemic triazole fungicides like Tebuconazole or Propiconazole"],
+          "prevention": ["Plant rust-resistant wheat varieties", "Sow early in the season to evade spore spikes"]
         },
         {
-          "disease": "Leaf Mold",
-          "organic": ["Prune branches to improve airflow", "Reduce humidity in greenhouses"],
-          "chemical": ["Apply Chlorothalonil or Calcium polysulfide"],
-          "prevention": ["Water early in the day", "Space plants widely"]
-        },
-        {
-          "disease": "Septoria Leaf Spot",
-          "organic": ["Remove infected leaves immediately", "Apply bio-fungicides like Serenade"],
-          "chemical": ["Spray with Mancozeb or Chlorothalonil-based fungicides"],
-          "prevention": ["Remove weeds and debris", "Do not work with plants when wet"]
-        },
-        {
-          "disease": "Spotted Spider Mites",
-          "organic": ["Introduce predatory ladybugs", "Spray with insecticidal soap or Neem oil"],
-          "chemical": ["Apply specific miticides if infestation is severe"],
-          "prevention": ["Keep plants well-watered", "Remove infested debris"]
-        },
-        {
-          "disease": "Target Spot",
-          "organic": ["Remove infected plant parts", "Improve air circulation around canopy"],
-          "chemical": ["Apply Azoxystrobin or Chlorothalonil"],
-          "prevention": ["Avoid overhead irrigation", "Use proper plant spacing"]
-        },
-        {
-          "disease": "Mosaic Virus",
-          "organic": ["No cure exists. Pull and destroy infected plants immediately."],
-          "chemical": ["No chemical treatments exist for viruses."],
-          "prevention": ["Wash hands with soap before handling", "Disinfect tools with bleach"]
-        },
-        {
-          "disease": "Yellow Leaf Curl Virus",
-          "organic": ["Remove infected plants", "Control whiteflies with yellow sticky traps"],
-          "chemical": ["Use insecticides like Imidacloprid to control whiteflies"],
-          "prevention": ["Use reflective mulches", "Plant resistant tomato varieties"]
+          "disease": "Yellow Rust",
+          "organic": ["Prune and destroy infected leaves", "Avoid working in wet fields to prevent spore spread"],
+          "chemical": ["Apply Triadimefon, Propiconazole, or Tebuconazole foliar sprays immediately"],
+          "prevention": ["Sow resistant cultivars", "Ensure wide plant spacing for fast leaf-drying"]
         }
       ]
     };
@@ -111,23 +100,19 @@ class TreatmentsScreen extends StatelessWidget {
       body: ListView(
         padding: const EdgeInsets.all(20.0),
         children: [
-          const Text(
-            "Cures & Treatments",
-            style: TextStyle(fontSize: 26, fontWeight: FontWeight.bold, color: Color(0xFF1C2333)),
-          ),
+          const Text("Cures & Treatments", style: TextStyle(fontSize: 26, fontWeight: FontWeight.bold, color: Color(0xFF1C2333))),
           const SizedBox(height: 8),
-          const Text(
-            "Browse comprehensive organic, chemical, and preventative treatment plans for all supported crops.",
-            style: TextStyle(fontSize: 16, color: Colors.grey, height: 1.4),
-          ),
+          const Text("Browse comprehensive organic, chemical, and preventative treatment plans for all supported crops.", style: TextStyle(fontSize: 16, color: Colors.grey, height: 1.4)),
           const SizedBox(height: 30),
 
           // --- CROP SECTIONS ---
-          _buildCropSection("Pepper Treatments", Icons.eco, const Color(0xFF27AE60), db["Pepper"]!),
+          _buildCropSection("Corn Treatments", Icons.eco, const Color(0xFFF1C40F), db["Corn"]!),
           const SizedBox(height: 25),
           _buildCropSection("Potato Treatments", Icons.grass, const Color(0xFFD35400), db["Potato"]!),
           const SizedBox(height: 25),
-          _buildCropSection("Tomato Treatments", Icons.local_florist, const Color(0xFFE74C3C), db["Tomato"]!),
+          _buildCropSection("Rice Treatments", Icons.spa, const Color(0xFF1ABC9C), db["Rice"]!),
+          const SizedBox(height: 25),
+          _buildCropSection("Wheat Treatments", Icons.wheat_arena, const Color(0xFFE67E22), db["Wheat"]!),
           const SizedBox(height: 40),
         ],
       ),

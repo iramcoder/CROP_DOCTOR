@@ -8,86 +8,75 @@ class DiseasesScreen extends StatelessWidget {
 
   // ==========================================================================
   // SECTION 2: DISEASE DETAILS DATABASE
-  // Focuses on identifying and understanding the diseases.
   // ==========================================================================
   Map<String, List<Map<String, dynamic>>> _getDiseaseDetailsDatabase() {
     return {
-      "Pepper": [
+      "Corn": [
         {
-          "disease": "Bacterial Spot",
-          "symptoms": ["Water-soaked spots on leaves that turn brown/black", "Leaves may turn yellow and drop prematurely", "Raised, scabby spots on the pepper fruit"],
-          "causes": ["Caused by Xanthomonas bacteria", "Thrives in warm, highly humid, and wet weather"],
-          "impact": ["Severe defoliation reduces fruit yield", "Sun-scald on exposed fruit"]
+          "disease": "Common Rust",
+          "symptoms": ["Golden-brown, powdery, elongated pustules on both leaf surfaces", "Pustules turn black as the plant matures"],
+          "causes": ["Puccinia sorghi fungus", "Spreads via wind-blown spores in high humidity"],
+          "impact": ["Interrupts photosynthesis, leading to smaller ears of corn and reduced starch yield"]
+        },
+        {
+          "disease": "Gray Leaf Spot",
+          "symptoms": ["Rectangular, tan-to-grey lesions restricted by leaf veins", "A greyish, dusty appearance when spores are actively producing"],
+          "causes": ["Cercospora zeae-maydis fungus", "Thrives in warm, wet climates and minimum-till fields"],
+          "impact": ["Severe defoliation restricts stalk strength and can cause complete lodging (falling) of the crop"]
+        },
+        {
+          "disease": "Northern Leaf Blight",
+          "symptoms": ["Long, cigar-shaped, grey-green to tan lesions on leaves", "Lesions start on lower leaves and progress upwards"],
+          "causes": ["Exserohilum turcicum fungus", "Thrives in moderate temperatures with heavy dew and rainfall"],
+          "impact": ["Drastically reduces grain production if infection occurs prior to silking"]
         }
       ],
       "Potato": [
         {
           "disease": "Early Blight",
           "symptoms": ["Dark, concentric rings (bullseye pattern) on older leaves", "Yellowing around the leaf spots", "Dark, sunken lesions on potato tubers"],
-          "causes": ["Caused by the Alternaria solani fungus", "Spreads rapidly during alternating wet and dry weather"],
+          "causes": ["Alternaria solani fungus", "Spreads rapidly during alternating wet and dry weather"],
           "impact": ["Premature leaf death limits tuber size and yield"]
         },
         {
           "disease": "Late Blight",
           "symptoms": ["Large, dark, water-soaked lesions on leaves", "White, fuzzy mold on the undersides of leaves in high humidity", "Tubers develop dry, corky rot"],
-          "causes": ["Caused by Phytophthora infestans (a water mold)", "Extremely contagious in cool, wet weather"],
+          "causes": ["Phytophthora infestans (a water mold)", "Extremely contagious in cool, wet weather"],
           "impact": ["Can destroy an entire field within days if left unchecked"]
         }
       ],
-      "Tomato": [
+      "Rice": [
         {
-          "disease": "Bacterial Spot",
-          "symptoms": ["Small, dark, greasy spots on leaves", "Spots on fruit that look like tiny, raised scabs"],
-          "causes": ["Xanthomonas bacteria spread by splashing rain or tools"],
-          "impact": ["Causes early leaf drop and unmarketable fruit"]
+          "disease": "Brown Spot",
+          "symptoms": ["Small, oval, dark brown spots with a greyish-center", "Spots are evenly distributed across the entire leaf blade"],
+          "causes": ["Bipolaris oryzae fungus", "Thrives in nutrient-deficient, poorly drained soils"],
+          "impact": ["Reduces grain weight, causing chalky kernels and severe milling losses"]
         },
         {
-          "disease": "Early Blight",
-          "symptoms": ["Bullseye-patterned spots starting on the lowest leaves", "Heavy yellowing around the spots"],
-          "causes": ["Alternaria solani fungus dwelling in the soil"],
-          "impact": ["Defoliation exposes fruit to sunscald and reduces yield"]
+          "disease": "Leaf Blast",
+          "symptoms": ["Eye-shaped (spindle) spots with dark borders and grey centers on leaves"],
+          "causes": ["Magnaporthe oryzae fungus", "Highly destructive in fields with high nitrogen fertilizer and high humidity"],
+          "impact": ["Severe leaf death reducing crop yield significantly"]
         },
         {
-          "disease": "Late Blight",
-          "symptoms": ["Irregular greenish-black water-soaked patches", "Rapid wilting of the entire plant"],
-          "causes": ["Phytophthora infestans spreading via wind-blown spores"],
-          "impact": ["Total crop failure; highly destructive"]
+          "disease": "Neck Blast",
+          "symptoms": ["Brownish-black lesions at the collar of the seed head causing the neck to collapse"],
+          "causes": ["Magnaporthe oryzae fungus", "Spreads from leaves to the neck during high humidity"],
+          "impact": ["Can cause 100% crop loss as it prevents the grains from filling up with starch"]
+        }
+      ],
+      "Wheat": [
+        {
+          "disease": "Brown Rust",
+          "symptoms": ["Small, circular, orange-brown pustules scattered randomly on leaves", "Pustules rupture the leaf skin to release dusty orange spores"],
+          "causes": ["Puccinia triticina fungus", "Spreads rapidly in moderate temperatures with high humidity"],
+          "impact": ["Reduces kernel size, wheat quality, and straw strength"]
         },
         {
-          "disease": "Leaf Mold",
-          "symptoms": ["Pale green or yellow spots on the upper leaf surface", "Olive-green to brown velvety mold on the bottom"],
-          "causes": ["Passalora fulva fungus", "Thrives in greenhouses with poor ventilation and high humidity"],
-          "impact": ["Reduces photosynthetic area, weakening the plant"]
-        },
-        {
-          "disease": "Septoria Leaf Spot",
-          "symptoms": ["Numerous small, circular spots with dark borders and grey/tan centers", "Tiny black specks in the center of the spots"],
-          "causes": ["Septoria lycopersici fungus from infected plant debris"],
-          "impact": ["Vigorous defoliation starting from the bottom up"]
-        },
-        {
-          "disease": "Spotted Spider Mites",
-          "symptoms": ["Tiny yellow or white speckles (stippling) on leaves", "Fine, silky webbing visible on stems and leaves"],
-          "causes": ["Tetranychus urticae (a tiny pest, not a fungus)", "Thrive in hot, very dry conditions"],
-          "impact": ["Leaves dry up and fall off; severe stress to the plant"]
-        },
-        {
-          "disease": "Target Spot",
-          "symptoms": ["Small brown spots with yellow halos", "Spots develop into target-like concentric circles"],
-          "causes": ["Corynespora cassiicola fungus"],
-          "impact": ["Causes lesions on both leaves and fruit, causing rot"]
-        },
-        {
-          "disease": "Mosaic Virus",
-          "symptoms": ["Mottled light and dark green patterns on leaves", "Leaves become fern-like or stringy", "Stunted overall plant growth"],
-          "causes": ["ToMV virus", "Spread easily by contaminated hands, tools, or tobacco products"],
-          "impact": ["Incurable. Permanently stunts growth and fruit production"]
-        },
-        {
-          "disease": "Yellow Leaf Curl Virus",
-          "symptoms": ["Severe upward curling and crinkling of leaves", "Yellowing of leaf margins", "Flowers drop before setting fruit"],
-          "causes": ["TYLCV virus, transmitted almost exclusively by Silverleaf Whiteflies"],
-          "impact": ["Devastating to yields; plants stop producing completely"]
+          "disease": "Yellow Rust",
+          "symptoms": ["Narrow, linear, yellow-to-orange stripes of pustules on the leaf veins", "Leaves dry out and die from the tip down"],
+          "causes": ["Puccinia striiformis fungus", "Thrives in cooler climates (typical of early spring)"],
+          "impact": ["Causes severe shriveling of grains and can decrease grain yields by 50% or more"]
         }
       ]
     };
@@ -111,23 +100,19 @@ class DiseasesScreen extends StatelessWidget {
       body: ListView(
         padding: const EdgeInsets.all(20.0),
         children: [
-          const Text(
-            "Identify Diseases",
-            style: TextStyle(fontSize: 26, fontWeight: FontWeight.bold, color: Color(0xFF1C2333)),
-          ),
+          const Text("Identify Diseases", style: TextStyle(fontSize: 26, fontWeight: FontWeight.bold, color: Color(0xFF1C2333))),
           const SizedBox(height: 8),
-          const Text(
-            "Identify and understand the symptoms, causes, and impacts of various crop diseases.",
-            style: TextStyle(fontSize: 16, color: Colors.grey, height: 1.4),
-          ),
+          const Text("Identify and understand the symptoms, causes, and impacts of various crop diseases.", style: TextStyle(fontSize: 16, color: Colors.grey, height: 1.4)),
           const SizedBox(height: 30),
 
           // --- CROP SECTIONS ---
-          _buildCropSection("Pepper Diseases", Icons.eco, const Color(0xFF27AE60), db["Pepper"]!),
+          _buildCropSection("Corn Diseases", Icons.eco, const Color(0xFFF1C40F), db["Corn"]!),
           const SizedBox(height: 25),
           _buildCropSection("Potato Diseases", Icons.grass, const Color(0xFFD35400), db["Potato"]!),
           const SizedBox(height: 25),
-          _buildCropSection("Tomato Diseases", Icons.local_florist, const Color(0xFFE74C3C), db["Tomato"]!),
+          _buildCropSection("Rice Diseases", Icons.spa, const Color(0xFF1ABC9C), db["Rice"]!),
+          const SizedBox(height: 25),
+          _buildCropSection("Wheat Diseases", Icons.wheat_arena, const Color(0xFFE67E22), db["Wheat"]!),
           const SizedBox(height: 40),
         ],
       ),
@@ -172,7 +157,6 @@ class DiseasesScreen extends StatelessWidget {
             expandedCrossAxisAlignment: CrossAxisAlignment.start,
             children: [
               const Divider(), const SizedBox(height: 10),
-              // Updated to show Symptoms, Causes, and Impact
               _buildRow(Icons.warning_amber_rounded, "Symptoms:", data["symptoms"], const Color(0xFFE67E22)), const SizedBox(height: 15),
               _buildRow(Icons.biotech, "Causes:", data["causes"], const Color(0xFF8E44AD)), const SizedBox(height: 15),
               _buildRow(Icons.trending_down, "Impact:", data["impact"], const Color(0xFFE74C3C)),
