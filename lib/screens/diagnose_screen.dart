@@ -39,15 +39,16 @@ class _DiagnoseScreenState extends State<DiagnoseScreen> {
   // Loads your new model.tflite and labels.txt from the assets folder
   Future<void> _loadModel() async {
     try {
-      await Tflite.loadModel(
+      String? res = await Tflite.loadModel(
         model: "assets/model.tflite", 
         labels: "assets/labels.txt", 
         numThreads: 1, 
         isAsset: true, 
         useGpuDelegate: false
       );
+      print("AI_LOG: Model Load Status -> $res");
     } catch (e) {
-      print("Failed to load model: $e");
+      print("AI_LOG: Failed to load model -> $e");
     }
   }
 
@@ -60,7 +61,7 @@ class _DiagnoseScreenState extends State<DiagnoseScreen> {
   }
 
   // ==========================================================================
-  // SECTION 4: AI INFERENCE ENGINE
+  // SECTION 4: AI INFERENCE & COMPREHENSIVE DIAGNOSTIC LOGGER
   // ==========================================================================
   Future<void> runAiAnalysis() async {
     if (_tempImageFile == null) return;
@@ -73,15 +74,19 @@ class _DiagnoseScreenState extends State<DiagnoseScreen> {
         imageMean: 127.5,    // Subtracts 127.5 to shift pixels to [-127.5, 127.5]
         imageStd: 127.5,     // Divides by 127.5 to scale exactly to [-1.0, 1.0]
         numResults: 15,      // Matches your labels.txt class count
-        threshold: 0.1,    
+        threshold: 0.0,      // Threshold 0.0 forces the model to show all outputs for debugging
         asynch: true,
       );
 
-      // --- DEBUG LOGGING ---
-      // This will print to your Debug Console when running via USB
-      print("=============================");
-      print("RAW RECOGNITIONS: $recognitions");
-      print("=============================");
+      // --- SIMPLIFIED SHORT KEYWORD DIAGNOSTICS ---
+      print("AI_LOG: File size (bytes) -> ${await _tempImageFile!.length()}");
+      print("AI_LOG: Raw results -> $recognitions");
+      
+      if (recognitions != null && recognitions.isNotEmpty) {
+        print("AI_LOG: Top Index -> ${recognitions[0]['index']}");
+        print("AI_LOG: Top Label -> ${recognitions[0]['label']}");
+        print("AI_LOG: Top Conf -> ${recognitions[0]['confidence']}");
+      }
 
       if (recognitions != null && recognitions.isNotEmpty) {
         
@@ -111,6 +116,7 @@ class _DiagnoseScreenState extends State<DiagnoseScreen> {
               disease = parts[1].replaceAll('_', ' '); // E.g., "Brown Rust"
             }
           }
+          // Check for the word 'healthy' to determine status
           healthy = disease.toLowerCase().contains("healthy");
         }
 
@@ -143,7 +149,7 @@ class _DiagnoseScreenState extends State<DiagnoseScreen> {
       }
     } catch (e) {
       setState(() { isLoading = false; diseaseName = "Error running model"; status = "Failed"; hasScanned = true; });
-      print("Error running model: $e");
+      print("AI_LOG: Prediction Exception -> $e");
     }
   }
 
