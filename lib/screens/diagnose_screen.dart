@@ -8,6 +8,7 @@ import 'package:tflite_v2/tflite_v2.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:hive_flutter/hive_flutter.dart'; 
 import 'login_screen.dart'; 
+import 'treatments_screen.dart'; 
 
 class DiagnoseScreen extends StatefulWidget {
   final Uint8List imageBytes;
@@ -51,6 +52,7 @@ class _DiagnoseScreenState extends State<DiagnoseScreen> {
     }
   }
 
+  // TFLite requires a physical file path to run inference
   Future<void> _saveBytesToTempFile() async {
     final tempDir = await getTemporaryDirectory();
     final file = await File('${tempDir.path}/temp_crop.jpg').create();
@@ -66,18 +68,25 @@ class _DiagnoseScreenState extends State<DiagnoseScreen> {
     setState(() { isLoading = true; });
 
     try {
-      // Preprocessing config adjusted for standard Keras/Python [0.0 to 1.0] scaling
+      // Configuration 1: Standard Python MobileNet [-1.0 to 1.0] scaling
       var recognitions = await Tflite.runModelOnImage(
         path: _tempImageFile!.path,
-        imageMean: 0.0,    // Normalization mean set to 0.0 for Python TFLite models
-        imageStd: 255.0,   // Divides raw 0-255 pixels by 255.0 to yield a 0.0-1.0 range
-        numResults: 15,    // Set to 15 to map to the 15 classes in your new labels.txt
+        imageMean: 127.5,    // Subtracts 127.5 to shift pixels to [-127.5, 127.5]
+        imageStd: 127.5,     // Divides by 127.5 to scale exactly to [-1.0, 1.0]
+        numResults: 15,      // Matches your labels.txt class count
         threshold: 0.1,    
         asynch: true,
       );
 
+      // --- DEBUG LOGGING ---
+      // This will print to your VS Code Debug Console when running on USB
+      print("=============================");
+      print("RAW RECOGNITIONS: $recognitions");
+      print("=============================");
+
       if (recognitions != null && recognitions.isNotEmpty) {
-        // 1. Strip out the leading digits (e.g., "0 Corn___Common_Rust" -> "Corn___Common_Rust")
+        
+        // 1. Clean the label (removes leading digits like "0 Corn___Common_Rust")
         String label = recognitions[0]['label'].replaceAll(RegExp(r'^[0-9]+\s'), '').trim();
         double conf = recognitions[0]['confidence'];
 
@@ -97,10 +106,10 @@ class _DiagnoseScreenState extends State<DiagnoseScreen> {
             crop = parts[0].replaceAll('_', ' '); 
             
             if (parts.length > 1) {
-              disease = parts[1].replaceAll('_', ' '); // <--- FIXED: Safely parsing item index [1]
+              disease = parts[1].replaceAll('_', ' '); 
             }
           }
-          // Scan history expects a standard check for the word 'healthy'
+          // Check for the word 'healthy' to determine status
           healthy = disease.toLowerCase().contains("healthy");
         }
 
@@ -133,6 +142,7 @@ class _DiagnoseScreenState extends State<DiagnoseScreen> {
       }
     } catch (e) {
       setState(() { isLoading = false; diseaseName = "Error running model"; status = "Failed"; hasScanned = true; });
+      print("Error running model: $e");
     }
   }
 
@@ -161,6 +171,7 @@ class _DiagnoseScreenState extends State<DiagnoseScreen> {
               const Text("AI Analysis Results", style: TextStyle(fontSize: 22, fontWeight: FontWeight.bold, color: Color(0xFF1C2333))),
               const SizedBox(height: 15),
               
+              // --- RESULTS CARD ---
               Container(
                 width: double.infinity, padding: const EdgeInsets.all(20),
                 decoration: BoxDecoration(color: Colors.white, borderRadius: BorderRadius.circular(16), boxShadow: [BoxShadow(color: Colors.black.withOpacity(0.05), blurRadius: 10, offset: const Offset(0, 4))]),
@@ -177,7 +188,7 @@ class _DiagnoseScreenState extends State<DiagnoseScreen> {
               ),
               const SizedBox(height: 30),
 
-              // Main button to trigger AI analysis
+              // --- MAIN ACTION BUTTON (See Treatments / Run Scan) ---
               SizedBox(
                 width: double.infinity,
                 height: 58,
@@ -190,7 +201,7 @@ class _DiagnoseScreenState extends State<DiagnoseScreen> {
                       ? null
                       : (hasScanned
                             ? () { 
-                                // Show a message if they try to click "See Treatments" on an invalid card
+                                // Disable treatment screen if the image was invalid
                                 if (cropName == "Unrecognized") {
                                   ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text("Cannot show treatments for an invalid image.")));
                                   return;
@@ -209,7 +220,7 @@ class _DiagnoseScreenState extends State<DiagnoseScreen> {
               
               const SizedBox(height: 15),
 
-              // Vertical actions: Scan New & Change Profile
+              // --- SECONDARY ACTION BUTTONS (Scan New & Change Profile) ---
               if (!isLoading) ...[
                 SizedBox(
                   width: double.infinity,
@@ -253,6 +264,7 @@ class _DiagnoseScreenState extends State<DiagnoseScreen> {
   }
 }
 
+// Result Row UI Helper
 class ResultRow extends StatelessWidget {
   final String label; final String value; final bool isAlert;
   const ResultRow({super.key, required this.label, required this.value, this.isAlert = false});
@@ -264,64 +276,6 @@ class ResultRow extends StatelessWidget {
         Text(label, style: const TextStyle(fontSize: 16, color: Colors.grey, fontWeight: FontWeight.w500)), const SizedBox(width: 16),
         Expanded(child: Text(value, textAlign: TextAlign.right, style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold, color: isAlert ? const Color(0xFFE74C3C) : const Color(0xFF1C2333)))),
       ],
-    );
-  }
-}
-
-// =========================================================================
-// SECTION 6: DEDICATED TREATMENT SCREEN
-// =========================================================================
-class TreatmentScreen extends StatelessWidget {
-  final String crop;
-  final String disease;
-  final String labelKey;
-  final bool isHealthy;
-
-  const TreatmentScreen({
-    super.key,
-    required this.crop,
-    required this.disease,
-    required this.labelKey,
-    required this.isHealthy,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      backgroundColor: const Color(0xFFF4F6F5),
-      appBar: AppBar(
-        title: const Text('Treatment Guide', style: TextStyle(color: Colors.black)),
-        backgroundColor: Colors.white,
-        elevation: 0,
-        iconTheme: const IconThemeData(color: Colors.black),
-      ),
-      body: Center(
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            const Icon(Icons.info_outline, size: 60, color: Color(0xFF159A6C)),
-            const SizedBox(height: 15),
-            Text(
-              "Diagnosis: $crop",
-              style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
-            ),
-            const SizedBox(height: 5),
-            Text(
-              disease,
-              style: const TextStyle(fontSize: 16, color: Colors.grey),
-            ),
-            const SizedBox(height: 25),
-            const Padding(
-              padding: EdgeInsets.symmetric(horizontal: 40.0),
-              child: Text(
-                "Detailed offline treatment plans for this model are being finalized. Check back in the next update!",
-                textAlign: TextAlign.center,
-                style: TextStyle(fontSize: 14, color: Colors.grey),
-              ),
-            ),
-          ],
-        ),
-      ),
     );
   }
 }
