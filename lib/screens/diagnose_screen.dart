@@ -61,7 +61,7 @@ class _DiagnoseScreenState extends State<DiagnoseScreen> {
   }
 
   // ==========================================================================
-  // SECTION 4: AI INFERENCE & COMPREHENSIVE DIAGNOSTIC LOGGER
+  // SECTION 4: AI INFERENCE & HIGHEST-PRECISION PARSER
   // ==========================================================================
   Future<void> runAiAnalysis() async {
     if (_tempImageFile == null) return;
@@ -103,17 +103,18 @@ class _DiagnoseScreenState extends State<DiagnoseScreen> {
           crop = "Unrecognized";
           disease = "Not a valid leaf";
         } else {
-          // 3. Strip any leading digits and underscores (e.g., "12 Wheat___" -> "Wheat___")
+          // 3. Strip leading digits and clean trailing whitespaces/underscores
+          // FIXED: Uses single-escaped raw regex literal to match the digits and optional space perfectly
           String cleanLabel = rawLabelStr.replaceAll(RegExp(r'^\d+\s*'), '').trim();
 
           // 4. Split by the triple underscores "___"
           List<String> parts = cleanLabel.split('___');
           
           if (parts.isNotEmpty) {
-            crop = parts[0].replaceAll('_', ' '); // E.g., "Wheat"
+            crop = parts[0].replaceAll('_', ' ').trim(); // E.g., "Wheat"
             
             if (parts.length > 1) {
-              disease = parts[1].replaceAll('_', ' '); // E.g., "Brown Rust"
+              disease = parts[1].replaceAll('_', ' ').trim(); // E.g., "Brown Rust"
             }
           }
           // Check for the word 'healthy' to determine status
@@ -274,6 +275,7 @@ class _DiagnoseScreenState extends State<DiagnoseScreen> {
 class ResultRow extends StatelessWidget {
   final String label; final String value; final bool isAlert;
   const ResultRow({super.key, required this.label, required this.value, this.isAlert = false});
+
   @override
   Widget build(BuildContext context) {
     return Row(
