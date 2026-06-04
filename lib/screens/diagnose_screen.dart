@@ -27,6 +27,7 @@ class _DiagnoseScreenState extends State<DiagnoseScreen> {
   int confidence = 0;
   bool isLoading = false;
   bool hasScanned = false;
+  bool _showTreatments = false; // Controls the cascading treatment view
   File? _tempImageFile;
 
   @override
@@ -65,7 +66,10 @@ class _DiagnoseScreenState extends State<DiagnoseScreen> {
   // ==========================================================================
   Future<void> runAiAnalysis() async {
     if (_tempImageFile == null) return;
-    setState(() { isLoading = true; });
+    setState(() { 
+      isLoading = true; 
+      _showTreatments = false; // Reset cascading view on new scan
+    });
 
     try {
       // Configuration 1: Standard Python MobileNet [-1.0 to 1.0] scaling
@@ -75,6 +79,8 @@ class _DiagnoseScreenState extends State<DiagnoseScreen> {
         imageStd: 127.5,     // Divides by 127.5 to scale exactly to [-1.0, 1.0]
         numResults: 15,      // Matches your labels.txt class count
         threshold: 0.0,      // Threshold 0.0 forces the model to show all outputs for debugging
+        imageHeight: 224,    // Force proper dimension to avoid stretching
+        imageWidth: 224,
         asynch: true,
       );
 
@@ -104,7 +110,6 @@ class _DiagnoseScreenState extends State<DiagnoseScreen> {
           disease = "Not a valid leaf";
         } else {
           // 3. Strip leading digits and clean trailing whitespaces/underscores
-          // FIXED: Uses single-escaped raw regex literal to match the digits and optional space perfectly
           String cleanLabel = rawLabelStr.replaceAll(RegExp(r'^\d+\s*'), '').trim();
 
           // 4. Split by the triple underscores "___"
@@ -161,7 +166,83 @@ class _DiagnoseScreenState extends State<DiagnoseScreen> {
   }
 
   // ==========================================================================
-  // SECTION 5: USER INTERFACE
+  // SECTION 5: INLINE TREATMENT DATABASE & CASCADING VIEW
+  // ==========================================================================
+  Map<String, dynamic>? _getSpecificTreatment(String crop, String disease) {
+    // Database covering every disease from the 15 Labels
+    final db = {
+      "Corn": {
+        "Common Rust": {"organic": ["Apply neem oil or sulfur-based sprays", "Remove infected foliage"], "chemical": ["Apply preventative fungicides (Pyraclostrobin/Azoxystrobin)"], "prevention": ["Plant resistant hybrids", "Destroy infected crop residues"]},
+        "Gray Leaf Spot": {"organic": ["Apply Bacillus subtilis bio-fungicide", "Rotate away from grass families"], "chemical": ["Apply strobilurin or triazole fungicides"], "prevention": ["Avoid no-till farming", "Maintain balanced soil nitrogen"]},
+        "Northern Leaf Blight": {"organic": ["Apply biological fungicides", "Ensure clean tillage to bury residues"], "chemical": ["Use foliar fungicides (Azoxystrobin)"], "prevention": ["Choose disease-resistant hybrids", "Rotate with soybeans"]}
+      },
+      "Potato": {
+        "Early Blight": {"organic": ["Remove lower infected leaves", "Apply compost tea/baking soda spray"], "chemical": ["Apply Chlorothalonil or Mancozeb", "Use Azoxystrobin sprays"], "prevention": ["Ensure good plant spacing", "Mulch around the base"]},
+        "Late Blight": {"organic": ["Destroy infected plants immediately", "Apply Copper sprays as prevention"], "chemical": ["Apply systemic fungicides (Mefenoxam) immediately"], "prevention": ["Plant resistant varieties", "Destroy cull piles"]}
+      },
+      "Rice": {
+        "Brown Spot": {"organic": ["Apply organic compost", "Use disease-free seed batches"], "chemical": ["Treat seeds with Captan or Thiram", "Apply Propiconazole spray"], "prevention": ["Apply proper potassium/zinc", "Keep fields well-drained"]},
+        "Leaf Blast": {"organic": ["Avoid excessive water logging", "Deeply plow infected crop straw"], "chemical": ["Treat seeds with Tricyclazole", "Apply Isoprothiolane"], "prevention": ["Avoid excessive nitrogen", "Plant blast-resistant cultivars"]},
+        "Neck Blast": {"organic": ["Control weeds near fields", "Manage water levels carefully"], "chemical": ["Apply Kasugamycin or Tricyclazole"], "prevention": ["Avoid excessive nitrogen", "Plant blast-resistant cultivars"]}
+      },
+      "Wheat": {
+        "Brown Rust": {"organic": ["Apply Neem oil or Garlic extract", "Remove alternative weed hosts"], "chemical": ["Apply triazole fungicides (Tebuconazole)"], "prevention": ["Plant rust-resistant varieties", "Sow early in the season"]},
+        "Yellow Rust": {"organic": ["Prune and destroy infected leaves", "Avoid working in wet fields"], "chemical": ["Apply Triadimefon or Tebuconazole sprays"], "prevention": ["Sow resistant cultivars", "Ensure wide plant spacing"]}
+      }
+    };
+    if (db.containsKey(crop) && db[crop]!.containsKey(disease)) return db[crop]![disease];
+    return null;
+  }
+
+  Widget _buildCascadingTreatmentView() {
+    final data = _getSpecificTreatment(cropName, diseaseName);
+    if (data == null) {
+      return const Padding(
+        padding: EdgeInsets.only(top: 15),
+        child: Text("Treatment data for this specific issue is currently unavailable.", style: TextStyle(color: Colors.grey)),
+      );
+    }
+
+    return Padding(
+      padding: const EdgeInsets.only(top: 15),
+      child: Container(
+        decoration: BoxDecoration(color: Colors.white, borderRadius: BorderRadius.circular(16), boxShadow: [BoxShadow(color: Colors.black.withOpacity(0.04), blurRadius: 10, offset: const Offset(0, 4))]),
+        padding: const EdgeInsets.all(20),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            const Row(
+              children: [
+                Icon(Icons.healing, color: Color(0xFF159A6C), size: 24),
+                SizedBox(width: 10),
+                Text("Recommended Action Plan", style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: Color(0xFF1C2333))),
+              ],
+            ),
+            const Divider(height: 30),
+            _buildTreatmentRow(Icons.eco, "Organic Solutions", data["organic"], const Color(0xFF2ECC71)),
+            const SizedBox(height: 15),
+            _buildTreatmentRow(Icons.science, "Chemical Solutions", data["chemical"], const Color(0xFFE67E22)),
+            const SizedBox(height: 15),
+            _buildTreatmentRow(Icons.shield, "Prevention Tactics", data["prevention"], const Color(0xFF3498DB)),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildTreatmentRow(IconData icon, String title, List<String> items, Color color) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Row(children: [Icon(icon, size: 18, color: color), const SizedBox(width: 8), Text(title, style: TextStyle(fontSize: 15, fontWeight: FontWeight.bold, color: color))]),
+        const SizedBox(height: 6),
+        ...items.map((item) => Padding(padding: const EdgeInsets.only(left: 26, bottom: 4), child: Row(crossAxisAlignment: CrossAxisAlignment.start, children: [const Text("• ", style: TextStyle(fontSize: 16, color: Colors.grey)), Expanded(child: Text(item, style: const TextStyle(fontSize: 14, color: Color(0xFF1C2333), height: 1.4)))]))),
+      ],
+    );
+  }
+
+  // ==========================================================================
+  // SECTION 6: USER INTERFACE
   // ==========================================================================
   @override
   Widget build(BuildContext context) {
@@ -209,23 +290,35 @@ class _DiagnoseScreenState extends State<DiagnoseScreen> {
                       ? null
                       : (hasScanned
                             ? () { 
-                                // Disable treatment screen if the image was invalid
+                                // Disable treatment view if the image was invalid
                                 if (cropName == "Unrecognized") {
                                   ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text("Cannot show treatments for an invalid image.")));
                                   return;
                                 }
-                                Navigator.push(context, MaterialPageRoute(builder: (context) => TreatmentScreen(crop: cropName, disease: diseaseName, labelKey: rawLabel, isHealthy: status == "Healthy"))); 
+                                if (status == "Healthy") {
+                                  ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text("Crop is healthy! No treatments required.")));
+                                  return;
+                                }
+                                // Toggle cascading view
+                                setState(() { _showTreatments = !_showTreatments; }); 
                               }
                             : runAiAnalysis),
                   child: isLoading
                       ? const SizedBox(width: 24, height: 24, child: CircularProgressIndicator(color: Colors.white, strokeWidth: 2))
                       : Text(
-                          hasScanned ? "See Treatments" : "Run AI Scan",
+                          hasScanned ? (_showTreatments ? "Hide Treatments" : "See Treatments") : "Run AI Scan",
                           style: const TextStyle(fontSize: 19, fontWeight: FontWeight.bold, color: Colors.white), 
                         ),
                 ),
               ),
               
+              // --- ANIMATED CASCADING TREATMENT VIEW ---
+              AnimatedSize(
+                duration: const Duration(milliseconds: 300),
+                curve: Curves.easeInOutCubic,
+                child: _showTreatments ? _buildCascadingTreatmentView() : const SizedBox.shrink(),
+              ),
+
               const SizedBox(height: 15),
 
               // --- SECONDARY ACTION BUTTONS ---
@@ -284,64 +377,6 @@ class ResultRow extends StatelessWidget {
         Text(label, style: const TextStyle(fontSize: 16, color: Colors.grey, fontWeight: FontWeight.w500)), const SizedBox(width: 16),
         Expanded(child: Text(value, textAlign: TextAlign.right, style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold, color: isAlert ? const Color(0xFFE74C3C) : const Color(0xFF1C2333)))),
       ],
-    );
-  }
-}
-
-// =========================================================================
-// SECTION 6: TEMPORARY STANDALONE PLACEHOLDER TREATMENT SCREEN
-// =========================================================================
-class TreatmentScreen extends StatelessWidget {
-  final String crop;
-  final String disease;
-  final String labelKey;
-  final bool isHealthy;
-
-  const TreatmentScreen({
-    super.key,
-    required this.crop,
-    required this.disease,
-    required this.labelKey,
-    required this.isHealthy,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      backgroundColor: const Color(0xFFF4F6F5),
-      appBar: AppBar(
-        title: const Text('Treatment Guide', style: TextStyle(color: Colors.black)),
-        backgroundColor: Colors.white,
-        elevation: 0,
-        iconTheme: const IconThemeData(color: Colors.black),
-      ),
-      body: Center(
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            const Icon(Icons.info_outline, size: 60, color: Color(0xFF159A6C)),
-            const SizedBox(height: 15),
-            Text(
-              "Diagnosis: $crop",
-              style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
-            ),
-            const SizedBox(height: 5),
-            Text(
-              disease,
-              style: const TextStyle(fontSize: 16, color: Colors.grey),
-            ),
-            const SizedBox(height: 25),
-            const Padding(
-              padding: EdgeInsets.symmetric(horizontal: 40.0),
-              child: Text(
-                "Detailed offline treatment plans for this model are being finalized. Check back in the next update!",
-                textAlign: TextAlign.center,
-                style: TextStyle(fontSize: 14, color: Colors.grey),
-              ),
-            ),
-          ],
-        ),
-      ),
     );
   }
 }
