@@ -27,7 +27,7 @@ class _DiagnoseScreenState extends State<DiagnoseScreen> {
   int confidence = 0;
   bool isLoading = false;
   bool hasScanned = false;
-  bool _showTreatments = false; // Controls the cascading treatment view
+  bool _showTreatments = false; 
   File? _tempImageFile;
 
   @override
@@ -37,7 +37,6 @@ class _DiagnoseScreenState extends State<DiagnoseScreen> {
     _saveBytesToTempFile();
   }
 
-  // Loads your new model.tflite and labels.txt from the assets folder
   Future<void> _loadModel() async {
     try {
       String? res = await Tflite.loadModel(
@@ -53,7 +52,6 @@ class _DiagnoseScreenState extends State<DiagnoseScreen> {
     }
   }
 
-  // TFLite requires a physical file path to run inference
   Future<void> _saveBytesToTempFile() async {
     final tempDir = await getTemporaryDirectory();
     final file = await File('${tempDir.path}/temp_crop.jpg').create();
@@ -62,41 +60,31 @@ class _DiagnoseScreenState extends State<DiagnoseScreen> {
   }
 
   // ==========================================================================
-  // SECTION 4: AI INFERENCE & HIGHEST-PRECISION PARSER
+  // SECTION 4: AI INFERENCE ENGINE
   // ==========================================================================
   Future<void> runAiAnalysis() async {
     if (_tempImageFile == null) return;
     setState(() { 
       isLoading = true; 
-      _showTreatments = false; // Reset cascading view on new scan
+      _showTreatments = false; 
     });
 
     try {
       // Configuration 1: Standard Python MobileNet [-1.0 to 1.0] scaling
       var recognitions = await Tflite.runModelOnImage(
         path: _tempImageFile!.path,
-        imageMean: 127.5,    // Subtracts 127.5 to shift pixels to [-127.5, 127.5]
-        imageStd: 127.5,     // Divides by 127.5 to scale exactly to [-1.0, 1.0]
-        numResults: 15,      // Matches your labels.txt class count
-        threshold: 0.0,      // Threshold 0.0 forces the model to show all outputs for debugging
-        imageHeight: 224,    // Force proper dimension to avoid stretching
-        imageWidth: 224,
+        imageMean: 127.5,    
+        imageStd: 127.5,     
+        numResults: 15,      
+        threshold: 0.0,      
+        // REMOVED: imageHeight and imageWidth parameters to fix compile error
         asynch: true,
       );
 
-      // --- SIMPLIFIED SHORT KEYWORD DIAGNOSTICS ---
-      print("AI_LOG: File size (bytes) -> ${await _tempImageFile!.length()}");
       print("AI_LOG: Raw results -> $recognitions");
-      
-      if (recognitions != null && recognitions.isNotEmpty) {
-        print("AI_LOG: Top Index -> ${recognitions[0]['index']}");
-        print("AI_LOG: Top Label -> ${recognitions[0]['label']}");
-        print("AI_LOG: Top Conf -> ${recognitions[0]['confidence']}");
-      }
 
       if (recognitions != null && recognitions.isNotEmpty) {
         
-        // 1. Extract the raw label (e.g., "12 Wheat___Brown_Rust")
         String rawLabelStr = recognitions[0]['label'].trim();
         double conf = recognitions[0]['confidence'];
 
@@ -104,29 +92,23 @@ class _DiagnoseScreenState extends State<DiagnoseScreen> {
         String disease = "Unknown Status";
         bool healthy = false;
 
-        // 2. Handle "Invalid"
         if (rawLabelStr.toLowerCase().contains("invalid")) {
           crop = "Unrecognized";
           disease = "Not a valid leaf";
         } else {
-          // 3. Strip leading digits and clean trailing whitespaces/underscores
           String cleanLabel = rawLabelStr.replaceAll(RegExp(r'^\d+\s*'), '').trim();
-
-          // 4. Split by the triple underscores "___"
           List<String> parts = cleanLabel.split('___');
           
           if (parts.isNotEmpty) {
-            crop = parts[0].replaceAll('_', ' ').trim(); // E.g., "Wheat"
+            crop = parts[0].replaceAll('_', ' ').trim(); 
             
             if (parts.length > 1) {
-              disease = parts[1].replaceAll('_', ' ').trim(); // E.g., "Brown Rust"
+              disease = parts[1].replaceAll('_', ' ').trim(); 
             }
           }
-          // Check for the word 'healthy' to determine status
           healthy = disease.toLowerCase().contains("healthy");
         }
 
-        // 5. Save to Database History
         final historyBox = Hive.box('scan_history');
         List<dynamic> userHistory = historyBox.get(widget.userName, defaultValue: []);
         
@@ -140,7 +122,6 @@ class _DiagnoseScreenState extends State<DiagnoseScreen> {
         userHistory.insert(0, newScan);
         historyBox.put(widget.userName, userHistory);
 
-        // 6. Update UI
         setState(() {
           rawLabel = rawLabelStr; 
           cropName = crop;
@@ -169,7 +150,6 @@ class _DiagnoseScreenState extends State<DiagnoseScreen> {
   // SECTION 5: INLINE TREATMENT DATABASE & CASCADING VIEW
   // ==========================================================================
   Map<String, dynamic>? _getSpecificTreatment(String crop, String disease) {
-    // Database covering every disease from the 15 Labels
     final db = {
       "Corn": {
         "Common Rust": {"organic": ["Apply neem oil or sulfur-based sprays", "Remove infected foliage"], "chemical": ["Apply preventative fungicides (Pyraclostrobin/Azoxystrobin)"], "prevention": ["Plant resistant hybrids", "Destroy infected crop residues"]},
@@ -242,13 +222,13 @@ class _DiagnoseScreenState extends State<DiagnoseScreen> {
   }
 
   // ==========================================================================
-  // SECTION 6: USER INTERFACE
+  // SECTION 6: MAIN USER INTERFACE
   // ==========================================================================
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: const Color(0xFFF4F6F5),
-      appBar: AppBar(title: const Text('Crop Analysis', style: TextStyle(color: Colors.black)), backgroundColor: Colors.white, elevation: 0, iconTheme: const IconThemeData(color: Colors.black)),
+      appBar: AppBar(title: const Text('Diagnosis', style: TextStyle(color: Colors.black)), backgroundColor: Colors.white, elevation: 0, iconTheme: const IconThemeData(color: Colors.black)),
       body: SingleChildScrollView(
         child: Padding(
           padding: const EdgeInsets.all(20.0),
@@ -260,7 +240,6 @@ class _DiagnoseScreenState extends State<DiagnoseScreen> {
               const Text("AI Analysis Results", style: TextStyle(fontSize: 22, fontWeight: FontWeight.bold, color: Color(0xFF1C2333))),
               const SizedBox(height: 15),
               
-              // --- RESULTS CARD ---
               Container(
                 width: double.infinity, padding: const EdgeInsets.all(20),
                 decoration: BoxDecoration(color: Colors.white, borderRadius: BorderRadius.circular(16), boxShadow: [BoxShadow(color: Colors.black.withOpacity(0.05), blurRadius: 10, offset: const Offset(0, 4))]),
@@ -277,7 +256,7 @@ class _DiagnoseScreenState extends State<DiagnoseScreen> {
               ),
               const SizedBox(height: 30),
 
-              // --- MAIN ACTION BUTTON (See Treatments / Run Scan) ---
+              // MAIN ACTION BUTTON
               SizedBox(
                 width: double.infinity,
                 height: 58,
@@ -290,7 +269,6 @@ class _DiagnoseScreenState extends State<DiagnoseScreen> {
                       ? null
                       : (hasScanned
                             ? () { 
-                                // Disable treatment view if the image was invalid
                                 if (cropName == "Unrecognized") {
                                   ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text("Cannot show treatments for an invalid image.")));
                                   return;
@@ -299,7 +277,6 @@ class _DiagnoseScreenState extends State<DiagnoseScreen> {
                                   ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text("Crop is healthy! No treatments required.")));
                                   return;
                                 }
-                                // Toggle cascading view
                                 setState(() { _showTreatments = !_showTreatments; }); 
                               }
                             : runAiAnalysis),
@@ -321,7 +298,6 @@ class _DiagnoseScreenState extends State<DiagnoseScreen> {
 
               const SizedBox(height: 15),
 
-              // --- SECONDARY ACTION BUTTONS ---
               if (!isLoading) ...[
                 SizedBox(
                   width: double.infinity,
